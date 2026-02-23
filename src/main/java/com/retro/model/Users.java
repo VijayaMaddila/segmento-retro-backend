@@ -3,6 +3,8 @@ package com.retro.model;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name="users")
 public class Users {
@@ -17,9 +19,11 @@ public class Users {
     @Column(nullable=false, unique=true)
     private String email;
 
+    @JsonIgnore
     @Column(nullable=false)
     private String password;
 
+    
     @OneToMany(mappedBy="createdBy")
     private List<Board> boards;
 

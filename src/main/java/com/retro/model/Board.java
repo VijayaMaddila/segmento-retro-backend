@@ -15,6 +15,7 @@ public class Board {
     @Column(nullable=false)
     private String title;
 
+    
     @ManyToOne
     @JoinColumn(name="created_by") 
     private Users createdBy;
