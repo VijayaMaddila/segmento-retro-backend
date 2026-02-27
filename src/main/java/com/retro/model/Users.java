@@ -24,30 +24,20 @@ public class Users {
     private String password;
 
     
-    @OneToMany(mappedBy="createdBy")
-    private List<Board> boards;
-
-    @OneToMany(mappedBy="createdBy")
-    private List<Card> cards;
-
-    @OneToMany(mappedBy="user")
-    private List<Vote> votes;
+   
 
     public Users()
     {
     	
     }
 
-	public Users(Long id, String name, String email, String password, List<Board> boards, List<Card> cards,
-			List<Vote> votes) {
+	public Users(Long id, String name, String email, String password) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.email = email;
 		this.password = password;
-		this.boards = boards;
-		this.cards = cards;
-		this.votes = votes;
+		
 	}
 
 	public Long getId() {
@@ -82,28 +72,6 @@ public class Users {
 		this.password = password;
 	}
 
-	public List<Board> getBoards() {
-		return boards;
-	}
-
-	public void setBoards(List<Board> boards) {
-		this.boards = boards;
-	}
-
-	public List<Card> getCards() {
-		return cards;
-	}
-
-	public void setCards(List<Card> cards) {
-		this.cards = cards;
-	}
-
-	public List<Vote> getVotes() {
-		return votes;
-	}
-
-	public void setVotes(List<Vote> votes) {
-		this.votes = votes;
-	}
+	
     
 }

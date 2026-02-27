@@ -1,5 +1,7 @@
 package com.retro.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,48 +10,46 @@ import com.retro.model.BoardColumn;
 import com.retro.repository.BoardColumnRepository;
 import com.retro.repository.BoardRepository;
 
-import java.util.List;
+import jakarta.transaction.Transactional;
 
 @Service
 public class BoardColumnService {
 
     @Autowired
-    private BoardColumnRepository columnRepository;
+    private BoardColumnRepository boardColumnRepository;
 
     @Autowired
     private BoardRepository boardRepository;
 
-    
-    public BoardColumn createColumn(Long boardId, String title) {
+    // ---------------- ADD COLUMN TO BOARD ----------------
+    @Transactional
+    public BoardColumn addColumn(Long boardId, BoardColumn column) {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new RuntimeException("Board not found"));
-
-        BoardColumn column = new BoardColumn();
-        column.setName(title);
         column.setBoard(board);
-
-        return columnRepository.save(column);
+        return boardColumnRepository.save(column);
     }
 
-    
+    // ---------------- GET ALL COLUMNS FOR A BOARD ----------------
     public List<BoardColumn> getColumnsByBoard(Long boardId) {
-        return columnRepository.findByBoardId(boardId);
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new RuntimeException("Board not found"));
+        return boardColumnRepository.findByBoard(board);
     }
 
-    
-    public BoardColumn updateColumn(Long columnId, String title) {
-        BoardColumn column = columnRepository.findById(columnId)
+    // ---------------- UPDATE COLUMN ----------------
+    @Transactional
+    public BoardColumn updateColumn(Long columnId, BoardColumn updatedColumn) {
+        BoardColumn column = boardColumnRepository.findById(columnId)
                 .orElseThrow(() -> new RuntimeException("Column not found"));
-
-        column.setName(title);
-        return columnRepository.save(column);
+        column.setTitle(updatedColumn.getTitle());
+        column.setPosition(updatedColumn.getPosition());
+        return boardColumnRepository.save(column);
     }
 
-    
+    // ---------------- DELETE COLUMN ----------------
+    @Transactional
     public void deleteColumn(Long columnId) {
-        if (!columnRepository.existsById(columnId)) {
-            throw new RuntimeException("Column not found");
-        }
-        columnRepository.deleteById(columnId);
+        boardColumnRepository.deleteById(columnId);
     }
 }

@@ -1,95 +1,71 @@
 package com.retro.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.*;
+
 @Entity
-@Table(name="cards")
+@Table(name = "cards")
 public class Card {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
     private String content;
 
+    // Card -> BoardColumn
     @ManyToOne
-    @JoinColumn(name="column_id")
-    private BoardColumn column;
+    @JsonBackReference(value = "column-cards") // matches BoardColumn.cards
+    @JoinColumn(name = "board_column_id")
+    private BoardColumn boardColumn;
 
+    // Card -> Users (creator) — optional: just ignore for JSON
     @ManyToOne
-    @JoinColumn(name="created_by")
+    @JsonIgnore
+    @JoinColumn(name = "created_by")
     private Users createdBy;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    // Card -> Comments
+    @JsonManagedReference(value = "card-comments")
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy="card", cascade=CascadeType.ALL)
+    // Card -> Votes
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "card-votes")
     private List<Vote> votes;
 
-    public Card()
-    {
-    	
+    // ---------------- Constructors ----------------
+    public Card() {}
+
+    public Card(String content, BoardColumn boardColumn, Users createdBy) {
+        this.content = content;
+        this.boardColumn = boardColumn;
+        this.createdBy = createdBy;
     }
 
-	public Card(Long id, String content, BoardColumn column, Users createdBy, LocalDateTime createdAt,
-			List<Vote> votes) {
-		super();
-		this.id = id;
-		this.content = content;
-		this.column = column;
-		this.createdBy = createdBy;
-		this.createdAt = createdAt;
-		this.votes = votes;
-	}
+    // ---------------- Getters & Setters ----------------
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-	public Long getId() {
-		return id;
-	}
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public BoardColumn getBoardColumn() { return boardColumn; }
+    public void setBoardColumn(BoardColumn boardColumn) { this.boardColumn = boardColumn; }
 
-	public String getContent() {
-		return content;
-	}
+    public Users getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Users createdBy) { this.createdBy = createdBy; }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public List<Comment> getComments() { return comments; }
+    public void setComments(List<Comment> comments) { this.comments = comments; }
 
-	public BoardColumn getColumn() {
-		return column;
-	}
-
-	public void setColumn(BoardColumn column) {
-		this.column = column;
-	}
-
-	public Users getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(Users createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public List<Vote> getVotes() {
-		return votes;
-	}
-
-	public void setVotes(List<Vote> votes) {
-		this.votes = votes;
-	}
-    
+    public List<Vote> getVotes() { return votes; }
+    public void setVotes(List<Vote> votes) { this.votes = votes; }
 }

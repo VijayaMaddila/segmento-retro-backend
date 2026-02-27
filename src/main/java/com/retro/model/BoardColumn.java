@@ -3,78 +3,57 @@ package com.retro.model;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+
 @Entity
-@Table(name="columns")
+@Table(name = "board_columns")
 public class BoardColumn {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
-    private String name;
+    @Column(nullable = false)
+    private String title;
 
-    private Integer position;
+    private int position;
 
+    // Board -> Column (back reference)
     @ManyToOne
-    @JoinColumn(name="board_id")
+    @JsonBackReference(value = "board-columns") // matches Board.columns
+    @JoinColumn(name = "board_id")
     private Board board;
 
-    @OneToMany(mappedBy="column", cascade=CascadeType.ALL)
+    // Column -> Cards (managed reference, must have unique value)
+    @OneToMany(mappedBy = "boardColumn", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "column-cards") // <- unique value
     private List<Card> cards;
 
-    public BoardColumn()
-    {
-    	
+    // Constructors
+    public BoardColumn() {}
+
+    public BoardColumn(String title, int position, Board board) {
+        this.title = title;
+        this.position = position;
+        this.board = board;
     }
 
-	public BoardColumn(Long id, String name, Integer position, Board board, List<Card> cards) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.position = position;
-		this.board = board;
-		this.cards = cards;
-	}
+    // Getters & Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-	public Long getId() {
-		return id;
-	}
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public int getPosition() { return position; }
+    public void setPosition(int position) { this.position = position; }
 
-	public String getName() {
-		return name;
-	}
+    public Board getBoard() { return board; }
+    public void setBoard(Board board) { this.board = board; }
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Integer getPosition() {
-		return position;
-	}
-
-	public void setPosition(Integer position) {
-		this.position = position;
-	}
-
-	public Board getBoard() {
-		return board;
-	}
-
-	public void setBoard(Board board) {
-		this.board = board;
-	}
-
-	public List<Card> getCards() {
-		return cards;
-	}
-
-	public void setCards(List<Card> cards) {
-		this.cards = cards;
-	}
-    
+    public List<Card> getCards() { return cards; }
+    public void setCards(List<Card> cards) { this.cards = cards; }
 }

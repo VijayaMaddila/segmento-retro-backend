@@ -20,7 +20,7 @@ public class JwtUtil {
 				.claim("name",name)
 				.claim("email",email)
 				.setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis()+1000*60*60))
+				.setExpiration(new Date(System.currentTimeMillis()+1000*60*60*24))
 				.signWith(Keys.hmacShaKeyFor(Secret.getBytes()))
 				.compact();
 	}

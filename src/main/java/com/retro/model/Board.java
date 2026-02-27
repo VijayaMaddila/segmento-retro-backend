@@ -1,8 +1,20 @@
 package com.retro.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name="boards")
@@ -15,66 +27,85 @@ public class Board {
     @Column(nullable=false)
     private String title;
 
-    
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name="created_by") 
     private Users createdBy;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy="board", cascade=CascadeType.ALL)
+    
+    @JsonManagedReference(value = "board-columns")
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardColumn> columns;
+    
+    @OneToMany(mappedBy = "board")
+    @JsonManagedReference(value = "board-votes")
+    private List<Vote> votes;
 
-    public Board() {}
-
-    public Board(Long id, String title, Users createdBy, LocalDateTime createdAt,
-                 List<BoardColumn> columns) {
-        this.id = id;
-        this.title = title;
-        this.createdBy = createdBy;
-        this.createdAt = createdAt;
-        this.columns = columns;
+    public Board()
+    {
+    	
     }
 
-    // Getters and Setters
+	public Board(Long id, String title, Users createdBy, LocalDateTime createdAt, List<BoardColumn> columns,
+			List<Vote> votes) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.createdBy = createdBy;
+		this.createdAt = createdAt;
+		this.columns = columns;
+		this.votes = votes;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public Users getCreatedBy() {
-        return createdBy;
-    }
+	public Users getCreatedBy() {
+		return createdBy;
+	}
 
-    public void setCreatedBy(Users createdBy) {
-        this.createdBy = createdBy;
-    }
+	public void setCreatedBy(Users createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public List<BoardColumn> getColumns() {
-        return columns;
-    }
+	public List<BoardColumn> getColumns() {
+		return columns;
+	}
 
-    public void setColumns(List<BoardColumn> columns) {
-        this.columns = columns;
-    }
+	public void setColumns(List<BoardColumn> columns) {
+		this.columns = columns;
+	}
+
+	public List<Vote> getVotes() {
+		return votes;
+	}
+
+	public void setVotes(List<Vote> votes) {
+		this.votes = votes;
+	}
+
+	
+    
 }
