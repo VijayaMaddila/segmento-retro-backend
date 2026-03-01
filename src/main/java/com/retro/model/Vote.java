@@ -24,43 +24,74 @@ public class Vote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Vote -> Card
+    
     @ManyToOne
     @JoinColumn(name = "card_id")
-    @JsonBackReference(value = "card-votes") // match Card.votes
+    @JsonBackReference(value = "card-votes") 
     private Card card;
 
-    // Vote -> Board
+   
     @ManyToOne
     @JoinColumn(name = "board_id")
-    @JsonBackReference(value = "board-votes") // match Board.votes
+    @JsonBackReference(value = "board-votes") 
     private Board board;
 
-    // Vote -> User
+    
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;
 
-    // Constructors
+   
     public Vote() {}
 
-    public Vote(Long id, Card card, Users user, Board board) {
-        this.id = id;
-        this.card = card;
-        this.user = user;
-        this.board = board;
-    }
 
-    // Getters & Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+	public Vote(Long id, Card card, Board board, Users user) {
+		super();
+		this.id = id;
+		this.card = card;
+		this.board = board;
+		this.user = user;
+	}
 
-    public Card getCard() { return card; }
-    public void setCard(Card card) { this.card = card; }
 
-    public Users getUser() { return user; }
-    public void setUser(Users user) { this.user = user; }
+	public Long getId() {
+		return id;
+	}
 
-    public Board getBoard() { return board; }
-    public void setBoard(Board board) { this.board = board; }
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+	public Card getCard() {
+		return card;
+	}
+
+
+	public void setCard(Card card) {
+		this.card = card;
+	}
+
+
+	public Board getBoard() {
+		return board;
+	}
+
+
+	public void setBoard(Board board) {
+		this.board = board;
+	}
+
+
+	public Users getUser() {
+		return user;
+	}
+
+
+	public void setUser(Users user) {
+		this.user = user;
+	}
+
+   
 }

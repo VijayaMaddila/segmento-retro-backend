@@ -64,7 +64,7 @@ public class TemplateController {
 
         template.setTitle(templateDto.getTitle());
 
-        // Replace columns
+        
         template.getColumns().clear();
         if (templateDto.getColumns() != null) {
             for (TemplateDTO.TemplateColumnDTO colDto : templateDto.getColumns()) {

@@ -18,7 +18,7 @@ public class CardController {
     @Autowired
     private CardService cardService;
 
-    // ---------------- CREATE CARD ----------------
+    //CREATE CARD
     @PostMapping
     public Card createCard(@RequestBody CardRequestDTO request) {
         if (request.getColumnId() == null || request.getUserId() == null) {
@@ -31,26 +31,26 @@ public class CardController {
         );
     }
 
-    // ---------------- GET CARDS BY BOARD ----------------
+    //GET CARDS BY BOARD
     @GetMapping("/board/{boardId}")
     public ResponseEntity<List<Card>> getCardsByBoard(@PathVariable Long boardId) {
         return ResponseEntity.ok(cardService.getBoardCards(boardId));
     }
 
-    // ---------------- GET CARDS BY COLUMN ----------------
+    //GET CARDS BY COLUMN
     @GetMapping("/column/{columnId}")
     public ResponseEntity<List<Card>> getCardsByColumn(@PathVariable Long columnId) {
         return ResponseEntity.ok(cardService.getColumnCards(columnId));
     }
 
-    // ---------------- UPDATE CARD ----------------
+    //UPDATE CARD
     @PutMapping("/{cardId}")
     public ResponseEntity<Card> updateCard(@PathVariable Long cardId, @RequestBody CardRequestDTO request) {
         Card updatedCard = cardService.updateCard(cardId, request.getContent());
         return ResponseEntity.ok(updatedCard);
     }
 
-    // ---------------- DELETE CARD ----------------
+    // DELETE CARD
     @DeleteMapping("/{cardId}")
     public ResponseEntity<String> deleteCard(@PathVariable Long cardId) {
         cardService.deleteCard(cardId);

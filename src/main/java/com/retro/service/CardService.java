@@ -26,7 +26,7 @@ public class CardService {
     @Autowired
     private UserRepository userRepository;
 
-    // ---------------- CREATE CARD ----------------
+    //CREATE CARD
     @Transactional
     public Card createCard(Long boardColumnId, Long userId, String content) {
 
@@ -44,23 +44,27 @@ public class CardService {
         return cardRepository.save(card);
     }
 
-    // ---------------- GET CARDS BY BOARD ----------------
+ //GET CARDS BY BOARD
     public List<Card> getBoardCards(Long boardId) {
-        return cardRepository.findByBoardColumn_Board_Id(boardId);
+        return cardRepository
+            .findByBoardColumn_Board_IdAndDeletedFalse(boardId);
     }
 
-    // ---------------- GET CARDS BY COLUMN ----------------
+    //GET CARDS BY COLUMN 
     public List<Card> getColumnCards(Long columnId) {
-        return cardRepository.findByBoardColumn_Id(columnId);
+        return cardRepository
+            .findByBoardColumn_IdAndDeletedFalse(columnId);
     }
-
-    // ---------------- DELETE CARD ----------------
+    //DELETE CARD
     @Transactional
     public void deleteCard(Long cardId) {
-        cardRepository.deleteById(cardId);
+        Card card=cardRepository.findById(cardId)
+        		.orElseThrow(()->new RuntimeException("Card not found:"+cardId));
+        card.setDeleted(true);
+        cardRepository.save(card);
     }
 
-    // ---------------- UPDATE CARD ----------------
+    //UPDATE CARD
     @Transactional
     public Card updateCard(Long cardId, String content) {
         Card card = cardRepository.findById(cardId)

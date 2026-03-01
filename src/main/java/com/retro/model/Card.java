@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 
@@ -17,55 +17,105 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String content;
 
-    // Card -> BoardColumn
+    
     @ManyToOne
-    @JsonBackReference(value = "column-cards") // matches BoardColumn.cards
+    @JsonBackReference(value = "column-cards") 
     @JoinColumn(name = "board_column_id")
     private BoardColumn boardColumn;
 
-    // Card -> Users (creator) — optional: just ignore for JSON
     @ManyToOne
-    @JsonIgnore
+    @JsonIgnore 
     @JoinColumn(name = "created_by")
     private Users createdBy;
 
-    // Card -> Comments
-    @JsonManagedReference(value = "card-comments")
+    
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "card-comments")
     private List<Comment> comments = new ArrayList<>();
 
-    // Card -> Votes
+    
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "card-votes")
-    private List<Vote> votes;
+    private List<Vote> votes = new ArrayList<>();
 
-    // ---------------- Constructors ----------------
+    @Column(nullable=false)
+   private boolean deleted=false;
+    
     public Card() {}
 
-    public Card(String content, BoardColumn boardColumn, Users createdBy) {
-        this.content = content;
-        this.boardColumn = boardColumn;
-        this.createdBy = createdBy;
-    }
+    public Card(Long id, String content, BoardColumn boardColumn, Users createdBy, List<Comment> comments,
+			List<Vote> votes, boolean deleted) {
+		super();
+		this.id = id;
+		this.content = content;
+		this.boardColumn = boardColumn;
+		this.createdBy = createdBy;
+		this.comments = comments;
+		this.votes = votes;
+		this.deleted = deleted;
+	}
 
-    // ---------------- Getters & Setters ----------------
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+	public Long getId() {
+		return id;
+	}
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public BoardColumn getBoardColumn() { return boardColumn; }
-    public void setBoardColumn(BoardColumn boardColumn) { this.boardColumn = boardColumn; }
+	public String getContent() {
+		return content;
+	}
 
-    public Users getCreatedBy() { return createdBy; }
-    public void setCreatedBy(Users createdBy) { this.createdBy = createdBy; }
+	public void setContent(String content) {
+		this.content = content;
+	}
 
-    public List<Comment> getComments() { return comments; }
-    public void setComments(List<Comment> comments) { this.comments = comments; }
+	public BoardColumn getBoardColumn() {
+		return boardColumn;
+	}
 
-    public List<Vote> getVotes() { return votes; }
-    public void setVotes(List<Vote> votes) { this.votes = votes; }
+	public void setBoardColumn(BoardColumn boardColumn) {
+		this.boardColumn = boardColumn;
+	}
+
+	public Users getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(Users createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public List<Comment> getComments() {
+		return comments;
+	}
+
+	public void setComments(List<Comment> comments) {
+		this.comments = comments;
+	}
+
+	public List<Vote> getVotes() {
+		return votes;
+	}
+
+	public void setVotes(List<Vote> votes) {
+		this.votes = votes;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+
+    
+	
+
+   
 }

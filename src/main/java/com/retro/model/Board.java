@@ -5,16 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name="boards")
@@ -31,9 +22,15 @@ public class Board {
     @JoinColumn(name="created_by") 
     private Users createdBy;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @ManyToOne
+    @JoinColumn(name="team_id")
+    private Team team; 
 
+    private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(nullable=false)
+    private boolean deleted=false;
+
     @JsonManagedReference(value = "board-columns")
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardColumn> columns;
@@ -42,18 +39,17 @@ public class Board {
     @JsonManagedReference(value = "board-votes")
     private List<Vote> votes;
 
-    public Board()
-    {
-    	
-    }
+    public Board() {}
 
-	public Board(Long id, String title, Users createdBy, LocalDateTime createdAt, List<BoardColumn> columns,
-			List<Vote> votes) {
+	public Board(Long id, String title, Users createdBy, Team team, LocalDateTime createdAt, boolean deleted,
+			List<BoardColumn> columns, List<Vote> votes) {
 		super();
 		this.id = id;
 		this.title = title;
 		this.createdBy = createdBy;
+		this.team = team;
 		this.createdAt = createdAt;
+		this.deleted = deleted;
 		this.columns = columns;
 		this.votes = votes;
 	}
@@ -82,12 +78,28 @@ public class Board {
 		this.createdBy = createdBy;
 	}
 
+	public Team getTeam() {
+		return team;
+	}
+
+	public void setTeam(Team team) {
+		this.team = team;
+	}
+
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	public List<BoardColumn> getColumns() {
@@ -105,7 +117,8 @@ public class Board {
 	public void setVotes(List<Vote> votes) {
 		this.votes = votes;
 	}
-
-	
     
+    
+
+   
 }

@@ -23,18 +23,32 @@ public class Template {
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TemplateColumn> columns = new ArrayList<>();
     public Template() {}
+	public Template(Long id, String title, List<TemplateColumn> columns) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.columns = columns;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public List<TemplateColumn> getColumns() {
+		return columns;
+	}
+	public void setColumns(List<TemplateColumn> columns) {
+		this.columns = columns;
+	}
 
-    public Template(String title) {
-        this.title = title;
-    }
+   
 
-    // Getters & Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public List<TemplateColumn> getColumns() { return columns; }
-    public void setColumns(List<TemplateColumn> columns) { this.columns = columns; }
+   
 }

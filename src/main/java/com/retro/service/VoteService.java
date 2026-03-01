@@ -1,6 +1,7 @@
 package com.retro.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,33 +29,33 @@ public class VoteService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private BoardRepository boardRepository;
-
-    // ---------------- ADD VOTE ----------------
+    // ADD VOTE
     @Transactional
-    public Vote addVote(Long cardId, Long userId) {
+    public void toggleVote(Long cardId, Long userId) {
 
+        Optional<Vote> existingVote =
+                voteRepository.findByCardIdAndUserId(cardId, userId);
+
+        
+        if (existingVote.isPresent()) {
+            voteRepository.delete(existingVote.get());
+            return;   
+        }
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
 
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Optional: Check if vote already exists
-        voteRepository.findByCardAndUser(card, user).ifPresent(v -> {
-            throw new RuntimeException("User has already voted for this card");
-        });
-
         Vote vote = new Vote();
         vote.setCard(card);
         vote.setUser(user);
-        vote.setBoard(card.getBoardColumn().getBoard()); // optional convenience
+        vote.setBoard(card.getBoardColumn().getBoard());
 
-        return voteRepository.save(vote);
+        voteRepository.save(vote);
     }
 
-    // ---------------- REMOVE VOTE ----------------
+    // REMOVE VOTE
     @Transactional
     public void removeVote(Long cardId, Long userId) {
         Card card = cardRepository.findById(cardId)
@@ -68,7 +69,7 @@ public class VoteService {
         voteRepository.delete(vote);
     }
 
-    // ---------------- GET VOTES FOR CARD ----------------
+    //GET VOTES FOR CARD 
     public List<Vote> getVotesByCard(Long cardId) {
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));

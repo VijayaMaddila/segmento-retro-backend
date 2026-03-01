@@ -18,7 +18,7 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    // ---------------- ADD COMMENT ----------------
+    //ADD COMMENT 
     @PostMapping
     public ResponseEntity<Comment> addComment(@RequestBody CommentRequestDTO request) {
         Comment comment = commentService.addComment(
@@ -29,14 +29,14 @@ public class CommentController {
         return ResponseEntity.ok(comment);
     }
 
-    // ---------------- GET COMMENTS BY CARD ----------------
+    //GET COMMENTS BY CARD
     @GetMapping("/card/{cardId}")
     public ResponseEntity<List<Comment>> getCommentsByCard(@PathVariable Long cardId) {
         List<Comment> comments = commentService.getCommentsByCard(cardId);
         return ResponseEntity.ok(comments);
     }
 
-    // ---------------- UPDATE COMMENT ----------------
+    //UPDATE COMMENT
     @PutMapping("/{commentId}")
     public ResponseEntity<Comment> updateComment(@PathVariable Long commentId,
                                                  @RequestBody CommentRequestDTO request) {
@@ -44,10 +44,11 @@ public class CommentController {
         return ResponseEntity.ok(updated);
     }
 
-    // ---------------- DELETE COMMENT ----------------
-    @DeleteMapping("/{commentId}")
-    public ResponseEntity<String> deleteComment(@PathVariable Long commentId) {
-        commentService.deleteComment(commentId);
-        return ResponseEntity.ok("Comment deleted successfully.");
+    //DELETE COMMENT
+    @DeleteMapping("/comments/{id}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long id) {
+
+        commentService.deleteComment(id);
+        return ResponseEntity.ok("Comment deleted successfully");
     }
 }

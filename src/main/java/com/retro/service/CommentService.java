@@ -26,7 +26,7 @@ public class CommentService {
     @Autowired
     private UserRepository userRepository;
 
-    // ---------------- CREATE COMMENT ----------------
+    //CREATE COMMENT
     @Transactional
     public Comment addComment(Long cardId, Long userId, String message) {
         Card card = cardRepository.findById(cardId)
@@ -42,25 +42,36 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    // ---------------- GET COMMENTS FOR CARD ----------------
+    //GET COMMENTS FOR CARD
     public List<Comment> getCommentsByCard(Long cardId) {
+
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
-        return commentRepository.findByCard(card);
+
+        return commentRepository.findByCardAndDeletedFalse(card);
     }
 
-    // ---------------- UPDATE COMMENT ----------------
+    //UPDATE COMMENT
     @Transactional
     public Comment updateComment(Long commentId, String message) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        Comment comment = commentRepository
+                .findByIdAndDeletedFalse(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found or already deleted"));
+
         comment.setMessage(message);
         return commentRepository.save(comment);
     }
 
-    // ---------------- DELETE COMMENT ----------------
+    //DELETE COMMENT
     @Transactional
     public void deleteComment(Long commentId) {
-        commentRepository.deleteById(commentId);
+
+        Comment comment = commentRepository
+                .findByIdAndDeletedFalse(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found or already deleted"));
+
+        comment.setDeleted(true);
+        commentRepository.save(comment);
     }
 }

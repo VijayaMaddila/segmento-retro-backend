@@ -21,39 +21,102 @@ public class BoardColumn {
 
     private int position;
 
-    // Board -> Column (back reference)
+    
     @ManyToOne
-    @JsonBackReference(value = "board-columns") // matches Board.columns
-    @JoinColumn(name = "board_id")
+    @JsonBackReference(value = "board-columns") 
+    @JoinColumn(name = "board_id",nullable = false)
     private Board board;
 
-    // Column -> Cards (managed reference, must have unique value)
+    
     @OneToMany(mappedBy = "boardColumn", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "column-cards") // <- unique value
+    @JsonManagedReference(value = "column-cards") 
     private List<Card> cards;
 
-    // Constructors
+    
+    private Boolean deleted=false;
+    
+    
     public BoardColumn() {}
 
-    public BoardColumn(String title, int position, Board board) {
-        this.title = title;
-        this.position = position;
-        this.board = board;
-    }
 
-    // Getters & Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+	public BoardColumn(Long id, String title, int position, Board board, List<Card> cards, Boolean deleted) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.position = position;
+		this.board = board;
+		this.cards = cards;
+		this.deleted = deleted;
+	}
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
 
-    public int getPosition() { return position; }
-    public void setPosition(int position) { this.position = position; }
+	public Long getId() {
+		return id;
+	}
 
-    public Board getBoard() { return board; }
-    public void setBoard(Board board) { this.board = board; }
 
-    public List<Card> getCards() { return cards; }
-    public void setCards(List<Card> cards) { this.cards = cards; }
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+	public String getTitle() {
+		return title;
+	}
+
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+
+	public int getPosition() {
+		return position;
+	}
+
+
+	public void setPosition(int position) {
+		this.position = position;
+	}
+
+
+	public Board getBoard() {
+		return board;
+	}
+
+
+	public void setBoard(Board board) {
+		this.board = board;
+	}
+
+
+	public List<Card> getCards() {
+		return cards;
+	}
+
+
+	public void setCards(List<Card> cards) {
+		this.cards = cards;
+	}
+
+
+	public Boolean getDeleted() {
+		return deleted;
+	}
+
+
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
+	}
+    
+    
+
+
+
+
+
+	
+
+	
+   
 }

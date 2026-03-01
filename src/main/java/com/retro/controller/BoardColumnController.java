@@ -6,7 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.retro.dto.ColumnRequestDTO;
+import com.retro.dto.UpdatedColumnRequestDTO;
+import com.retro.model.Board;
 import com.retro.model.BoardColumn;
+import com.retro.repository.BoardColumnRepository;
+import com.retro.repository.BoardRepository;
 import com.retro.service.BoardColumnService;
 
 @RestController
@@ -17,10 +22,20 @@ public class BoardColumnController {
     @Autowired
     private BoardColumnService boardColumnService;
 
-    // ADD column to board
+    
+
     @PostMapping("/{boardId}")
-    public ResponseEntity<BoardColumn> addColumn(@PathVariable Long boardId, @RequestBody BoardColumn column) {
-        return ResponseEntity.ok(boardColumnService.addColumn(boardId, column));
+    
+    public ResponseEntity<BoardColumn> addColumn(
+            @RequestBody ColumnRequestDTO dto) {
+
+        BoardColumn column = new BoardColumn();
+        column.setTitle(dto.getTitle());
+        column.setPosition(dto.getPosition());
+
+        return ResponseEntity.ok(
+            boardColumnService.addColumn(dto.getBoardId(), column)
+        );
     }
 
     // GET all columns for a board
@@ -29,10 +44,14 @@ public class BoardColumnController {
         return ResponseEntity.ok(boardColumnService.getColumnsByBoard(boardId));
     }
 
-    // UPDATE column
     @PutMapping("/{columnId}")
-    public ResponseEntity<BoardColumn> updateColumn(@PathVariable Long columnId, @RequestBody BoardColumn column) {
-        return ResponseEntity.ok(boardColumnService.updateColumn(columnId, column));
+    public ResponseEntity<BoardColumn> updateColumn(
+            @PathVariable Long columnId,
+            @RequestBody UpdatedColumnRequestDTO request) {
+
+        return ResponseEntity.ok(
+            boardColumnService.updateColumnName(columnId, request.getTitle())
+        );
     }
 
     // DELETE column
