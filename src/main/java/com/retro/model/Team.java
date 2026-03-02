@@ -40,7 +40,6 @@ public class Team {
         this.deleted = deleted;
     }
 
-    // -------- Getters & Setters --------
     public Long getId() {
         return id;
     }

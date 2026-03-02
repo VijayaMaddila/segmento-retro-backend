@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.retro.dto.VoteRequestDTO;
 import com.retro.dto.VoteResponseDTO;
-import com.retro.dto.VoteStatsDTO;
+import com.retro.model.Vote;
 import com.retro.service.VoteService;
-
 
 @RestController
 @RequestMapping("/api/votes")
@@ -20,64 +20,69 @@ public class VoteController {
     @Autowired
     private VoteService voteService;
 
-    // TOGGLE VOTE (Add or Remove)
-    @PostMapping("/card/{cardId}/user/{userId}")
-    public ResponseEntity<Map<String, Object>> toggleVote(@PathVariable Long cardId,
-                                                          @PathVariable Long userId) {
-        Map<String, Object> response = voteService.toggleVote(cardId, userId);
-        return ResponseEntity.ok(response);
+    //add vote
+    @PostMapping
+    public ResponseEntity<?> addVote(@RequestBody VoteRequestDTO request) {
+        try {
+            VoteResponseDTO response = voteService.addVote(request.getUserId(), request.getCardId());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            System.err.println("Failed to add vote: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    //delete vote
+    @DeleteMapping
+    public ResponseEntity<?> removeVote(@RequestBody VoteRequestDTO request) {
+        try {
+            VoteResponseDTO response = voteService.removeVote(request.getUserId(), request.getCardId());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            System.err.println("Failed to remove vote: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
-    // GET VOTE COUNT FOR CARD
-    @GetMapping("/card/{cardId}/count")
-    public ResponseEntity<Integer> getVoteCount(@PathVariable Long cardId) {
-        return ResponseEntity.ok(voteService.getVoteCount(cardId));
+    //get vote
+    @GetMapping("/card/{cardId}/user/{userId}")
+    public ResponseEntity<VoteResponseDTO> getVoteInfo(
+            @PathVariable Long cardId,
+            @PathVariable Long userId) {
+        try {
+            VoteResponseDTO response = voteService.getVoteInfo(cardId, userId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
-    // GET WHO VOTED ON CARD
-    @GetMapping("/card/{cardId}/voters")
-    public ResponseEntity<List<VoteResponseDTO>> getVoters(@PathVariable Long cardId) {
-        return ResponseEntity.ok(voteService.getVotesByCard(cardId));
+    /**
+     * Get remaining votes for a user on a board
+     * GET /api/votes/board/{boardId}/user/{userId}/remaining
+     */
+    @GetMapping("/board/{boardId}/user/{userId}/remaining")
+    public ResponseEntity<Long> getRemainingVotes(
+            @PathVariable Long boardId,
+            @PathVariable Long userId) {
+        long remaining = voteService.getRemainingVotes(userId, boardId);
+        return ResponseEntity.ok(remaining);
     }
 
-    // CHECK IF USER VOTED ON CARD
-    @GetMapping("/card/{cardId}/user/{userId}/check")
-    public ResponseEntity<Map<String, Boolean>> checkUserVote(@PathVariable Long cardId,
-                                                               @PathVariable Long userId) {
-        boolean hasVoted = voteService.hasUserVoted(cardId, userId);
-        return ResponseEntity.ok(Map.of("voted", hasVoted));
-    }
-
-    // GET VOTE STATS FOR CARD (includes voters and current user status)
-    @GetMapping("/card/{cardId}/stats")
-    public ResponseEntity<VoteStatsDTO> getVoteStats(@PathVariable Long cardId,
-                                                      @RequestParam Long userId) {
-        return ResponseEntity.ok(voteService.getVoteStats(cardId, userId));
-    }
-
-    // GET ALL VOTES FOR BOARD (grouped by card)
+    // get all votes of particular board
     @GetMapping("/board/{boardId}")
-    public ResponseEntity<Map<Long, List<VoteResponseDTO>>> getBoardVotes(@PathVariable Long boardId) {
-        return ResponseEntity.ok(voteService.getVotesByBoard(boardId));
+    public ResponseEntity<Map<Long, Long>> getBoardVotes(@PathVariable Long boardId) {
+        Map<Long, Long> votes = voteService.getBoardVotes(boardId);
+        return ResponseEntity.ok(votes);
     }
 
-    // GET USER'S VOTES ON BOARD
+    //votes of specified used
     @GetMapping("/board/{boardId}/user/{userId}")
-    public ResponseEntity<List<VoteResponseDTO>> getUserVotesOnBoard(@PathVariable Long boardId,
-                                                                      @PathVariable Long userId) {
-        return ResponseEntity.ok(voteService.getUserVotesOnBoard(boardId, userId));
-    }
-
-    // GET BOARD VOTE STATISTICS
-    @GetMapping("/board/{boardId}/statistics")
-    public ResponseEntity<Map<String, Object>> getBoardStatistics(@PathVariable Long boardId) {
-        return ResponseEntity.ok(voteService.getBoardVoteStatistics(boardId));
-    }
-    
-    // GET USER'S VOTE STATUS (remaining votes, limit info)
-    @GetMapping("/board/{boardId}/user/{userId}/status")
-    public ResponseEntity<Map<String, Object>> getUserVoteStatus(@PathVariable Long boardId,
-                                                                  @PathVariable Long userId) {
-        return ResponseEntity.ok(voteService.getUserVoteStatus(boardId, userId));
+    public ResponseEntity<List<Vote>> getUserBoardVotes(
+            @PathVariable Long boardId,
+            @PathVariable Long userId) {
+        List<Vote> votes = voteService.getUserBoardVotes(userId, boardId);
+        return ResponseEntity.ok(votes);
     }
 }

@@ -37,7 +37,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24h
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -65,4 +65,26 @@ public class JwtUtil {
     public String extractName(String token) {
         return extractAllClaims(token).get("name", String.class);
     }
+
+
+    
+    public String generateMagicLinkToken(Users user) {
+        Map<String, Object> claims = Map.of(
+                "id", user.getId(),
+                "name", user.getName(),
+                "email", user.getEmail(),
+                "role", user.getRole(),
+                "type", "magic_link"
+        );
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(user.getEmail())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+   
 }

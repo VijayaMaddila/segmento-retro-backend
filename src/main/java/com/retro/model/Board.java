@@ -34,15 +34,11 @@ public class Board {
     @JsonManagedReference(value = "board-columns")
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardColumn> columns;
-    
-    @OneToMany(mappedBy = "board")
-    @JsonManagedReference(value = "board-votes")
-    private List<Vote> votes;
 
     public Board() {}
 
 	public Board(Long id, String title, Users createdBy, Team team, LocalDateTime createdAt, boolean deleted,
-			List<BoardColumn> columns, List<Vote> votes) {
+			List<BoardColumn> columns) {
 		super();
 		this.id = id;
 		this.title = title;
@@ -51,7 +47,6 @@ public class Board {
 		this.createdAt = createdAt;
 		this.deleted = deleted;
 		this.columns = columns;
-		this.votes = votes;
 	}
 
 	public Long getId() {
@@ -108,14 +103,6 @@ public class Board {
 
 	public void setColumns(List<BoardColumn> columns) {
 		this.columns = columns;
-	}
-
-	public List<Vote> getVotes() {
-		return votes;
-	}
-
-	public void setVotes(List<Vote> votes) {
-		this.votes = votes;
 	}
     
     

@@ -36,25 +36,19 @@ public class Card {
     @JsonManagedReference(value = "card-comments")
     private List<Comment> comments = new ArrayList<>();
 
-    
-    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "card-votes")
-    private List<Vote> votes = new ArrayList<>();
-
     @Column(nullable=false)
    private boolean deleted=false;
     
     public Card() {}
 
     public Card(Long id, String content, BoardColumn boardColumn, Users createdBy, List<Comment> comments,
-			List<Vote> votes, boolean deleted) {
+			boolean deleted) {
 		super();
 		this.id = id;
 		this.content = content;
 		this.boardColumn = boardColumn;
 		this.createdBy = createdBy;
 		this.comments = comments;
-		this.votes = votes;
 		this.deleted = deleted;
 	}
 
@@ -96,14 +90,6 @@ public class Card {
 
 	public void setComments(List<Comment> comments) {
 		this.comments = comments;
-	}
-
-	public List<Vote> getVotes() {
-		return votes;
-	}
-
-	public void setVotes(List<Vote> votes) {
-		this.votes = votes;
 	}
 
 	public boolean isDeleted() {

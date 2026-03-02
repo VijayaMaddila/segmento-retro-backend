@@ -1,57 +1,18 @@
 package com.retro.dto;
 
-import java.time.LocalDateTime;
-
 public class VoteResponseDTO {
-    private Long voteId;
-    private Long userId;
-    private String userName;
-    private String userEmail;
     private Long cardId;
-    private LocalDateTime votedAt;
+    private long voteCount;
+    private boolean userHasVoted;
+    private long userRemainingVotes;
 
     public VoteResponseDTO() {}
 
-    public VoteResponseDTO(Long voteId, Long userId, String userName, String userEmail, Long cardId, LocalDateTime votedAt) {
-        this.voteId = voteId;
-        this.userId = userId;
-        this.userName = userName;
-        this.userEmail = userEmail;
+    public VoteResponseDTO(Long cardId, long voteCount, boolean userHasVoted, long userRemainingVotes) {
         this.cardId = cardId;
-        this.votedAt = votedAt;
-    }
-
-    // Getters and Setters
-    public Long getVoteId() {
-        return voteId;
-    }
-
-    public void setVoteId(Long voteId) {
-        this.voteId = voteId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+        this.voteCount = voteCount;
+        this.userHasVoted = userHasVoted;
+        this.userRemainingVotes = userRemainingVotes;
     }
 
     public Long getCardId() {
@@ -62,11 +23,27 @@ public class VoteResponseDTO {
         this.cardId = cardId;
     }
 
-    public LocalDateTime getVotedAt() {
-        return votedAt;
+    public long getVoteCount() {
+        return voteCount;
     }
 
-    public void setVotedAt(LocalDateTime votedAt) {
-        this.votedAt = votedAt;
+    public void setVoteCount(long voteCount) {
+        this.voteCount = voteCount;
+    }
+
+    public boolean isUserHasVoted() {
+        return userHasVoted;
+    }
+
+    public void setUserHasVoted(boolean userHasVoted) {
+        this.userHasVoted = userHasVoted;
+    }
+
+    public long getUserRemainingVotes() {
+        return userRemainingVotes;
+    }
+
+    public void setUserRemainingVotes(long userRemainingVotes) {
+        this.userRemainingVotes = userRemainingVotes;
     }
 }

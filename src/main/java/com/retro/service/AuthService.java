@@ -54,4 +54,22 @@ public class AuthService {
 
         return new AuthResponseDTO(token);
     }
+    
+    public AuthResponseDTO magicLogin(String magicToken) {
+        try {
+           
+            String email = jwtUtil.extractEmail(magicToken);
+            
+            
+            Users user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+           
+            String sessionToken = jwtUtil.generateToken(user);
+            
+            return new AuthResponseDTO(sessionToken);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid or expired magic link: " + e.getMessage());
+        }
+    }
 }

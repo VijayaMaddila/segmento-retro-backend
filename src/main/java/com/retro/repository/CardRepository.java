@@ -11,7 +11,7 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
 	 List<Card> findByBoardColumn_Board_Id(Long boardId);
 
-	    // Get all cards for a specific column
+	 
 	    List<Card> findByBoardColumn_Id(Long columnId);
 	    
 	    List<Card> findByDeletedFalse();

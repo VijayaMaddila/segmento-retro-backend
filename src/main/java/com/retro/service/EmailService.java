@@ -8,6 +8,8 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.AddressException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class EmailService {
@@ -49,18 +51,28 @@ public class EmailService {
             String boardTitle,
             String teamName,
             String creatorName,
-            String boardUrl) throws MessagingException {
+            String magicLinkUrl) throws MessagingException {
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(recipientEmail);
-            helper.setSubject("New Board Created: " + boardTitle);
+            helper.setSubject("New Board Assigned: " + boardTitle);
+            helper.setFrom("noreply@segmentoretro.com");
             
-            String htmlContent = "<h3>Hi " + recipientName + ",</h3>"
-                    + "<p>" + creatorName + " has created a new board \"" + boardTitle + "\" for your team \"" + teamName + "\".</p>"
-                    + "<p><a href='" + boardUrl + "'>Open Board</a></p>";
+            // Get current date
+            String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
+            
+            // Build professional HTML email
+            String htmlContent = buildBoardNotificationHtml(
+                recipientName,
+                boardTitle,
+                teamName,
+                creatorName,
+                currentDate,
+                magicLinkUrl
+            );
 
             helper.setText(htmlContent, true); // true = HTML
             
@@ -73,22 +85,160 @@ public class EmailService {
         }
     }
     
-    // Test email functionality
-    public void sendTestEmail(String to) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(to);
-            message.setSubject("Test Email from Retro Board");
-            message.setText("This is a test email to verify email configuration is working correctly.\n\n"
-                    + "If you received this email, your email service is configured properly!");
-            
-            System.out.println("Sending test email to: " + to);
-            mailSender.send(message);
-            System.out.println("✅ Test email sent successfully to: " + to);
-        } catch (Exception e) {
-            System.err.println("❌ Failed to send test email to: " + to + " - " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to send test email: " + e.getMessage());
-        }
+    /**
+     * Build professional HTML email template for board assignment notification
+     */
+    private String buildBoardNotificationHtml(
+            String recipientName,
+            String boardTitle,
+            String teamName,
+            String creatorName,
+            String createdDate,
+            String magicLinkUrl) {
+        
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "  <style>" +
+                "    body {" +
+                "      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;" +
+                "      background-color: #f5f7fa;" +
+                "      margin: 0;" +
+                "      padding: 0;" +
+                "    }" +
+                "    .email-container {" +
+                "      max-width: 600px;" +
+                "      margin: 40px auto;" +
+                "      background: white;" +
+                "      border-radius: 12px;" +
+                "      overflow: hidden;" +
+                "      box-shadow: 0 4px 12px rgba(0,0,0,0.1);" +
+                "    }" +
+                "    .email-header {" +
+                "      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" +
+                "      padding: 30px;" +
+                "      text-align: center;" +
+                "    }" +
+                "    .email-header h1 {" +
+                "      color: white;" +
+                "      margin: 0;" +
+                "      font-size: 24px;" +
+                "      font-weight: 600;" +
+                "    }" +
+                "    .email-body {" +
+                "      padding: 40px 30px;" +
+                "    }" +
+                "    .email-body h2 {" +
+                "      color: #1a1d23;" +
+                "      font-size: 20px;" +
+                "      margin: 0 0 20px 0;" +
+                "    }" +
+                "    .email-body p {" +
+                "      color: #4b5563;" +
+                "      font-size: 16px;" +
+                "      line-height: 1.6;" +
+                "      margin: 0 0 15px 0;" +
+                "    }" +
+                "    .board-info {" +
+                "      background: #f8f9fb;" +
+                "      border-left: 4px solid #667eea;" +
+                "      padding: 20px;" +
+                "      margin: 25px 0;" +
+                "      border-radius: 6px;" +
+                "    }" +
+                "    .board-info-item {" +
+                "      display: flex;" +
+                "      margin-bottom: 12px;" +
+                "    }" +
+                "    .board-info-item:last-child {" +
+                "      margin-bottom: 0;" +
+                "    }" +
+                "    .board-info-label {" +
+                "      font-weight: 600;" +
+                "      color: #374151;" +
+                "      min-width: 100px;" +
+                "    }" +
+                "    .board-info-value {" +
+                "      color: #6b7280;" +
+                "    }" +
+                "    .cta-button {" +
+                "      display: inline-block;" +
+                "      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" +
+                "      color: white !important;" +
+                "      text-decoration: none;" +
+                "      padding: 14px 32px;" +
+                "      border-radius: 8px;" +
+                "      font-size: 16px;" +
+                "      font-weight: 600;" +
+                "      margin: 20px 0;" +
+                "      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" +
+                "    }" +
+                "    .email-footer {" +
+                "      background: #f8f9fb;" +
+                "      padding: 20px 30px;" +
+                "      text-align: center;" +
+                "      color: #9ca3af;" +
+                "      font-size: 14px;" +
+                "    }" +
+                "    .divider {" +
+                "      height: 1px;" +
+                "      background: #e5e7eb;" +
+                "      margin: 25px 0;" +
+                "    }" +
+                "  </style>" +
+                "</head>" +
+                "<body>" +
+                "  <div class='email-container'>" +
+                "    <div class='email-header'>" +
+                "      <h1>🎯 New Board Assigned</h1>" +
+                "    </div>" +
+                "    " +
+                "    <div class='email-body'>" +
+                "      <h2>Hi " + recipientName + ",</h2>" +
+                "      " +
+                "      <p>Great news! A new retrospective board has been created and assigned to your team.</p>" +
+                "      " +
+                "      <div class='board-info'>" +
+                "        <div class='board-info-item'>" +
+                "          <span class='board-info-label'>Board Name:</span>" +
+                "          <span class='board-info-value'>" + boardTitle + "</span>" +
+                "        </div>" +
+                "        <div class='board-info-item'>" +
+                "          <span class='board-info-label'>Team:</span>" +
+                "          <span class='board-info-value'>" + teamName + "</span>" +
+                "        </div>" +
+                "        <div class='board-info-item'>" +
+                "          <span class='board-info-label'>Created By:</span>" +
+                "          <span class='board-info-value'>" + creatorName + "</span>" +
+                "        </div>" +
+                "        <div class='board-info-item'>" +
+                "          <span class='board-info-label'>Created On:</span>" +
+                "          <span class='board-info-value'>" + createdDate + "</span>" +
+                "        </div>" +
+                "      </div>" +
+                "      " +
+                "      <p>Click the button below to view your dashboard and access the board:</p>" +
+                "      " +
+                "      <center>" +
+                "        <a href='" + magicLinkUrl + "' class='cta-button'>" +
+                "          Open Dashboard" +
+                "        </a>" +
+                "      </center>" +
+                "      " +
+                "      <div class='divider'></div>" +
+                "      " +
+                "      <p style='font-size: 14px; color: #9ca3af;'>" +
+                "        You can also access the board by logging into SegmentoRetro and navigating to your dashboard." +
+                "      </p>" +
+                "    </div>" +
+                "    " +
+                "    <div class='email-footer'>" +
+                "      <p>© 2024 SegmentoRetro. All rights reserved.</p>" +
+                "      <p>This is an automated notification. Please do not reply to this email.</p>" +
+                "    </div>" +
+                "  </div>" +
+                "</body>" +
+                "</html>";
     }
+    
 }

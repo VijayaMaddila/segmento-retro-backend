@@ -29,4 +29,10 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO request) {
         return ResponseEntity.ok(authService.login(request));
     }
+    
+    
+    @GetMapping("/magic-login")
+    public ResponseEntity<AuthResponseDTO> magicLogin(@RequestParam String token) {
+        return ResponseEntity.ok(authService.magicLogin(token));
+    }
 }

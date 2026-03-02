@@ -80,11 +80,11 @@ public class Users implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null) return List.of();
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())); // important: ROLE_ prefix
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())); 
     }
 
     @Override
-    public String getUsername() { return email; } // Spring uses email as username
+    public String getUsername() { return email; }
 
     @Override
     public boolean isAccountNonExpired() { return true; }

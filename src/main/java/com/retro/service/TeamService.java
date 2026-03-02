@@ -45,9 +45,8 @@ public class TeamService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // =========================
-    // Create a new team
-    // =========================
+    
+    // Create  team
     public TeamDTO createTeam(TeamDTO teamDTO) {
         Users createdByUser = userRepository.findById(teamDTO.getCreatedBy())
                 .orElseThrow(() -> new RuntimeException("Creator user not found"));
@@ -73,9 +72,8 @@ public class TeamService {
         );
     }
 
-    // =========================
+    
     // Get all teams
-    // =========================
     public List<TeamDTO> getAllTeams() {
         return teamRepository.findAll()
                 .stream()
@@ -180,12 +178,12 @@ public class TeamService {
             response.put("token", jwtToken);
 
         } else {
-            // New user (first click) → Create account
+          
             user = new Users();
             user.setEmail(userEmail);
             user.setName(name != null ? name : "New User");
             
-            // Generate temporary password
+           
             String tempPassword = UUID.randomUUID().toString().substring(0, 12);
             user.setPassword(passwordEncoder.encode(tempPassword));
             user.setRole(Role.MEMBER);
@@ -198,21 +196,21 @@ public class TeamService {
             response.put("message", "Account created! Welcome to the team.");
             response.put("requiresPasswordSetup", true);
             response.put("action", "redirect");
-            response.put("tempPassword", tempPassword); // Send temp password in response
+            response.put("tempPassword", tempPassword); 
             
-            // Auto-login for new user
+        
             String jwtToken = jwtUtil.generateToken(user);
             response.put("token", jwtToken);
         }
 
-        // Add user to team if not already a member
+       
         Team team = invitation.getTeam();
         if (!team.getMembers().contains(user)) {
             team.getMembers().add(user);
             teamRepository.save(team);
         }
 
-        // Mark invitation as accepted (only on first successful use)
+       
         if (!invitation.isAccepted()) {
             invitation.setAccepted(true);
             invitationRepository.save(invitation);
@@ -221,9 +219,7 @@ public class TeamService {
         return response;
     }
     
-    // =========================
     // Check invitation status without accepting
-    // =========================
     public Map<String, Object> checkInvitationStatus(String token) {
         Optional<TeamInvitation> invitationOpt = invitationRepository.findByToken(token);
         
@@ -251,7 +247,7 @@ public class TeamService {
         status.put("createdAt", invitation.getCreatedAt());
         status.put("expiresAt", invitation.getCreatedAt().plusDays(7));
         
-        // Check if user already exists
+     
         Optional<Users> existingUser = userRepository.findByEmail(invitation.getEmail());
         status.put("userExists", existingUser.isPresent());
         

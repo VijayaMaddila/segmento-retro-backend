@@ -11,11 +11,11 @@ public class TeamInvitation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email; // Email of invited user
+    private String email;
 
-    private String token; // Unique token for joining
+    private String token;
 
-    private boolean accepted = false; // Status of invitation
+    private boolean accepted = false;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -31,20 +31,56 @@ public class TeamInvitation {
         this.team = team;
     }
 
-    // Getters & Setters
-    public Long getId() { return id; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
-    public boolean isAccepted() { return accepted; }
-    public void setAccepted(boolean accepted) { this.accepted = accepted; }
-    public Team getTeam() { return team; }
-    public void setTeam(Team team) { this.team = team; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    
-    // Check if invitation has expired (7 days)
-    public boolean isExpired() {
+   
+    public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public boolean isAccepted() {
+		return accepted;
+	}
+
+	public void setAccepted(boolean accepted) {
+		this.accepted = accepted;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Team getTeam() {
+		return team;
+	}
+
+	public void setTeam(Team team) {
+		this.team = team;
+	}
+
+	public boolean isExpired() {
         return LocalDateTime.now().isAfter(createdAt.plusDays(7));
     }
 }
