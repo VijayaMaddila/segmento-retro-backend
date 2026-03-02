@@ -8,6 +8,7 @@ import com.retro.dto.AuthResponseDTO;
 import com.retro.dto.LoginDTO;
 import com.retro.dto.RegisterRequestDTO;
 import com.retro.model.Users;
+import com.retro.model.Users.Role;
 import com.retro.repository.UserRepository;
 import com.retro.util.JwtUtil;
 
@@ -34,6 +35,7 @@ public class AuthService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.ADMIN);
         
 
         userRepository.save(user);
@@ -48,11 +50,7 @@ public class AuthService {
             throw new RuntimeException("Invalid password");
         }
 
-        String token = jwtUtil.generatedToken(
-                user.getId(),
-                user.getName(),
-                user.getEmail()
-        );
+        String token = jwtUtil.generateToken(user);
 
         return new AuthResponseDTO(token);
     }

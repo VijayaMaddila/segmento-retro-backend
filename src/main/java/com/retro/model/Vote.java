@@ -1,8 +1,10 @@
 package com.retro.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +16,7 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(
+    name = "votes",
     uniqueConstraints = {
         @UniqueConstraint(columnNames = {"card_id", "user_id"})
     }
@@ -40,17 +43,21 @@ public class Vote {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;
+    
+    @Column(name = "voted_at", nullable = false)
+    private LocalDateTime votedAt = LocalDateTime.now();
 
    
     public Vote() {}
 
 
-	public Vote(Long id, Card card, Board board, Users user) {
+	public Vote(Long id, Card card, Board board, Users user, LocalDateTime votedAt) {
 		super();
 		this.id = id;
 		this.card = card;
 		this.board = board;
 		this.user = user;
+		this.votedAt = votedAt;
 	}
 
 
@@ -91,6 +98,16 @@ public class Vote {
 
 	public void setUser(Users user) {
 		this.user = user;
+	}
+
+
+	public LocalDateTime getVotedAt() {
+		return votedAt;
+	}
+
+
+	public void setVotedAt(LocalDateTime votedAt) {
+		this.votedAt = votedAt;
 	}
 
    

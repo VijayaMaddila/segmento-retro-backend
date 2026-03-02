@@ -1,6 +1,7 @@
 package com.retro.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import com.retro.repository.TemplateRepository;
 
 @RestController
 @RequestMapping("/api/template-columns")
+@CrossOrigin("http://localhost:5173")
 public class TemplateColumnController {
 
     @Autowired

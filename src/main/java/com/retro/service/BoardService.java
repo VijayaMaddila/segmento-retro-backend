@@ -1,6 +1,7 @@
 package com.retro.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +34,12 @@ public class BoardService {
     @Autowired
     private TeamRepository teamRepository;
 
-    //CREATE BOARD
+
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     public Board createBoard(BoardDTO boardDto, Long userId) {
-
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId must not be null");
-        }
-
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -50,31 +49,65 @@ public class BoardService {
         board.setCreatedAt(LocalDateTime.now());
         board.setDeleted(false);
 
+        Team team = null;
         if (boardDto.getTeamId() != null) {
-            Team team = teamRepository.findById(boardDto.getTeamId())
+            team = teamRepository.findById(boardDto.getTeamId())
                     .orElseThrow(() -> new RuntimeException("Team not found"));
             board.setTeam(team);
         }
 
         Board savedBoard = boardRepository.save(board);
 
+        // Copy columns from template if provided
         if (boardDto.getTemplateId() != null) {
             Template template = templateRepository.findById(boardDto.getTemplateId())
                     .orElseThrow(() -> new RuntimeException("Template not found"));
 
-            List<TemplateColumn> templateColumns =
-                    templateColumnRepository.findByTemplateId(template.getId());
+            List<TemplateColumn> templateColumns = templateColumnRepository.findByTemplateId(template.getId());
 
             for (TemplateColumn tc : templateColumns) {
-                BoardColumn boardColumn = new BoardColumn();
-                boardColumn.setTitle(tc.getName());
-                boardColumn.setPosition(tc.getPosition());
-                boardColumn.setBoard(savedBoard);
-                boardColumnRepository.save(boardColumn);
+                BoardColumn bc = new BoardColumn();
+                bc.setTitle(tc.getName());
+                bc.setPosition(tc.getPosition());
+                bc.setBoard(savedBoard);
+                boardColumnRepository.save(bc);
             }
         }
 
+        // Send email notifications
+        if (team != null) {
+            sendBoardCreationNotifications(savedBoard, team);
+        }
+
         return savedBoard;
+    }
+
+    private void sendBoardCreationNotifications(Board board, Team team) {
+        String creatorName = board.getCreatedBy() != null ? board.getCreatedBy().getName() : "A team member";
+        String boardUrl = "http://localhost:5173/board/" + board.getId();
+
+        for (Users member : team.getMembers()) {
+            // Skip creator and members without email
+            if (member.getId().equals(board.getCreatedBy().getId()) || 
+                member.getEmail() == null || 
+                member.getEmail().trim().isEmpty()) {
+                continue;
+            }
+
+            try {
+                emailService.sendBoardCreationEmail(
+                        member.getEmail(),
+                        member.getName() != null ? member.getName() : "Team Member",
+                        board.getTitle(),
+                        team.getName(),
+                        creatorName,
+                        boardUrl
+                );
+                System.out.println("Board creation notification sent to: " + member.getEmail());
+            } catch (Exception e) {
+                System.err.println("Failed to send email to " + member.getEmail() + ": " + e.getMessage());
+            }
+        }
     }
 
     // ---------------- GET ALL BOARDS ----------------
@@ -142,9 +175,23 @@ public class BoardService {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Team> userTeams = teamRepository.findByMembersContaining(user);
+        List<Board> boards = new ArrayList<>();
+        
+        if (Users.Role.ADMIN.equals(user.getRole())) {
+            // ADMIN sees all their created boards + boards from teams they're in
+            boards.addAll(boardRepository.findByCreatedBy_IdAndDeletedFalse(userId));
+            List<Team> userTeams = teamRepository.findByMembersContainingAndDeletedFalse(user);
+            for (Team team : userTeams) {
+                boards.addAll(boardRepository.findByTeamAndDeletedFalse(team));
+            }
+        } else {
+            // MEMBER sees boards from teams they belong to
+            List<Team> userTeams = teamRepository.findByMembersContainingAndDeletedFalse(user);
+            for (Team team : userTeams) {
+                boards.addAll(boardRepository.findByTeamAndDeletedFalse(team));
+            }
+        }
 
-       
-        return boardRepository.findAccessibleBoards(user, userTeams);
+        return boards;
     }
 }

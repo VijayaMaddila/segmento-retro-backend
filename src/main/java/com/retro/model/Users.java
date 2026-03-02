@@ -2,11 +2,15 @@ package com.retro.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import java.util.Collection;
 import java.util.List;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
-public class Users {
+public class Users implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +22,14 @@ public class Users {
     private String name;
     
     private String password;
+    
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    public enum Role {
+        ADMIN, MEMBER
+    }
 
     // User -> Team
     @ManyToOne
@@ -25,70 +37,64 @@ public class Users {
     @JsonBackReference(value = "team-users")
     private Team team;
 
-    
     @OneToMany(mappedBy = "createdBy")
     @JsonBackReference(value = "user-boards")
     private List<Board> boards;
 
     public Users() {}
 
-	public Users(Long id, String email, String name, String password, Team team, List<Board> boards) {
-		super();
-		this.id = id;
-		this.email = email;
-		this.name = name;
-		this.password = password;
-		this.team = team;
-		this.boards = boards;
-	}
+    public Users(Long id, String email, String name, String password, Role role, Team team, List<Board> boards) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.role = role;
+        this.team = team;
+        this.boards = boards;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    @Override
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-	public String getName() {
-		return name;
-	}
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
 
-	public String getPassword() {
-		return password;
-	}
+    public List<Board> getBoards() { return boards; }
+    public void setBoards(List<Board> boards) { this.boards = boards; }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    // ---------------- UserDetails methods ----------------
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (role == null) return List.of();
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name())); // important: ROLE_ prefix
+    }
 
-	public Team getTeam() {
-		return team;
-	}
+    @Override
+    public String getUsername() { return email; } // Spring uses email as username
 
-	public void setTeam(Team team) {
-		this.team = team;
-	}
+    @Override
+    public boolean isAccountNonExpired() { return true; }
 
-	public List<Board> getBoards() {
-		return boards;
-	}
+    @Override
+    public boolean isAccountNonLocked() { return true; }
 
-	public void setBoards(List<Board> boards) {
-		this.boards = boards;
-	}
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
 
-   
+    @Override
+    public boolean isEnabled() { return true; }
 }
