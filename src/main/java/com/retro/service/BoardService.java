@@ -84,30 +84,10 @@ public class BoardService {
 
     private void sendBoardCreationNotifications(Board board, Team team) {
         String creatorName = board.getCreatedBy() != null ? board.getCreatedBy().getName() : "A team member";
-        String boardUrl = "http://localhost:5173/board/" + board.getId();
-
-        for (Users member : team.getMembers()) {
-            // Skip creator and members without email
-            if (member.getId().equals(board.getCreatedBy().getId()) || 
-                member.getEmail() == null || 
-                member.getEmail().trim().isEmpty()) {
-                continue;
-            }
-
-            try {
-                emailService.sendBoardCreationEmail(
-                        member.getEmail(),
-                        member.getName() != null ? member.getName() : "Team Member",
-                        board.getTitle(),
-                        team.getName(),
-                        creatorName,
-                        boardUrl
-                );
-                System.out.println("Board creation notification sent to: " + member.getEmail());
-            } catch (Exception e) {
-                System.err.println("Failed to send email to " + member.getEmail() + ": " + e.getMessage());
-            }
-        }
+        
+        // Note: This method is kept for backward compatibility but won't be used
+        // The BoardController now handles email sending with magic links
+        System.out.println("Board creation notifications handled by BoardController");
     }
 
     // ---------------- GET ALL BOARDS ----------------

@@ -33,6 +33,11 @@ public class TemplateController {
 
         Template template = new Template();
         template.setTitle(templateDto.getTitle());
+        template.setDescription(templateDto.getDescription());
+        template.setCategory(templateDto.getCategory());
+        template.setLanguage(templateDto.getLanguage());
+        template.setUsageCount(templateDto.getUsageCount() != null ? templateDto.getUsageCount() : 0);
+        template.setIsDefault(templateDto.getIsDefault() != null ? templateDto.getIsDefault() : false);
 
         List<TemplateColumn> columns = new ArrayList<>();
 
@@ -58,6 +63,21 @@ public class TemplateController {
         return templateRepository.findAll();
     }
 
+    @GetMapping("/category/{category}")
+    public List<Template> getTemplatesByCategory(@PathVariable String category) {
+        return templateRepository.findByCategory(category);
+    }
+
+    @GetMapping("/language/{language}")
+    public List<Template> getTemplatesByLanguage(@PathVariable String language) {
+        return templateRepository.findByLanguage(language);
+    }
+
+    @GetMapping("/default")
+    public List<Template> getDefaultTemplates() {
+        return templateRepository.findByIsDefaultTrue();
+    }
+
     @PutMapping("/{id}")
     public Template updateTemplate(@PathVariable Long id, @RequestBody TemplateDTO templateDto) {
 
@@ -65,6 +85,11 @@ public class TemplateController {
                 .orElseThrow(() -> new RuntimeException("Template not found"));
 
         template.setTitle(templateDto.getTitle());
+        if (templateDto.getDescription() != null) template.setDescription(templateDto.getDescription());
+        if (templateDto.getCategory() != null) template.setCategory(templateDto.getCategory());
+        if (templateDto.getLanguage() != null) template.setLanguage(templateDto.getLanguage());
+        if (templateDto.getUsageCount() != null) template.setUsageCount(templateDto.getUsageCount());
+        if (templateDto.getIsDefault() != null) template.setIsDefault(templateDto.getIsDefault());
 
         
         template.getColumns().clear();
@@ -85,5 +110,13 @@ public class TemplateController {
     public String deleteTemplate(@PathVariable Long id) {
         templateRepository.deleteById(id);
         return "Template deleted successfully";
+    }
+
+    @PostMapping("/{id}/use")
+    public Template incrementUsageCount(@PathVariable Long id) {
+        Template template = templateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Template not found"));
+        template.setUsageCount(template.getUsageCount() + 1);
+        return templateRepository.save(template);
     }
 }

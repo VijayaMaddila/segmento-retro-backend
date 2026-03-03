@@ -74,7 +74,7 @@ public class BoardController {
                         // Generate magic link token for passwordless login
                         String magicToken = jwtUtil.generateMagicLinkToken(member);
                         
-                        // Build magic link URL that logs them in and redirects to dashboard
+                        // Build magic link URL that logs them in and redirects to the specific board
                         String magicLinkUrl = "http://localhost:5173/magic-login?token=" + magicToken;
                         
                         emailService.sendBoardCreationEmail(
@@ -83,7 +83,8 @@ public class BoardController {
                             board.getTitle(),
                             team.getName(),
                             creator.getName() != null ? creator.getName() : creator.getEmail(),
-                            magicLinkUrl
+                            magicLinkUrl,
+                            board.getId()  // Pass board ID for direct board link
                         );
                     } catch (MessagingException e) {
                         System.err.println("Failed to send email to " + member.getEmail() + ": " + e.getMessage());

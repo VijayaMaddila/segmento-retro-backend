@@ -51,18 +51,22 @@ public class EmailService {
             String boardTitle,
             String teamName,
             String creatorName,
-            String magicLinkUrl) throws MessagingException {
+            String magicLinkUrl,
+            Long boardId) throws MessagingException {
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(recipientEmail);
-            helper.setSubject("New Board Assigned: " + boardTitle);
+            helper.setSubject("New Board: " + boardTitle + " - " + teamName);
             helper.setFrom("noreply@segmentoretro.com");
             
             // Get current date
             String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
+            
+            // Build magic link with boardId for direct board access
+            String directBoardLink = magicLinkUrl + "&boardId=" + boardId;
             
             // Build professional HTML email
             String htmlContent = buildBoardNotificationHtml(
@@ -71,6 +75,7 @@ public class EmailService {
                 teamName,
                 creatorName,
                 currentDate,
+                directBoardLink,
                 magicLinkUrl
             );
 
@@ -94,7 +99,8 @@ public class EmailService {
             String teamName,
             String creatorName,
             String createdDate,
-            String magicLinkUrl) {
+            String directBoardLink,
+            String dashboardLink) {
         
         return "<!DOCTYPE html>" +
                 "<html>" +
@@ -173,6 +179,11 @@ public class EmailService {
                 "      margin: 20px 0;" +
                 "      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" +
                 "    }" +
+                "    .secondary-link {" +
+                "      color: #667eea;" +
+                "      text-decoration: none;" +
+                "      font-weight: 500;" +
+                "    }" +
                 "    .email-footer {" +
                 "      background: #f8f9fb;" +
                 "      padding: 20px 30px;" +
@@ -190,13 +201,13 @@ public class EmailService {
                 "<body>" +
                 "  <div class='email-container'>" +
                 "    <div class='email-header'>" +
-                "      <h1>🎯 New Board Assigned</h1>" +
+                "      <h1>🎯 New Board Created</h1>" +
                 "    </div>" +
                 "    " +
                 "    <div class='email-body'>" +
                 "      <h2>Hi " + recipientName + ",</h2>" +
                 "      " +
-                "      <p>Great news! A new retrospective board has been created and assigned to your team.</p>" +
+                "      <p>" + creatorName + " has created a new board <strong>" + boardTitle + "</strong> for your team <strong>" + teamName + "</strong>.</p>" +
                 "      " +
                 "      <div class='board-info'>" +
                 "        <div class='board-info-item'>" +
@@ -217,18 +228,22 @@ public class EmailService {
                 "        </div>" +
                 "      </div>" +
                 "      " +
-                "      <p>Click the button below to view your dashboard and access the board:</p>" +
+                "      <p>Click the button below to open the board directly:</p>" +
                 "      " +
                 "      <center>" +
-                "        <a href='" + magicLinkUrl + "' class='cta-button'>" +
-                "          Open Dashboard" +
+                "        <a href='" + directBoardLink + "' class='cta-button'>" +
+                "          Open Board" +
                 "        </a>" +
                 "      </center>" +
+                "      " +
+                "      <p style='text-align: center; margin-top: 15px;'>" +
+                "        Or <a href='" + dashboardLink + "' class='secondary-link'>view all your boards</a>" +
+                "      </p>" +
                 "      " +
                 "      <div class='divider'></div>" +
                 "      " +
                 "      <p style='font-size: 14px; color: #9ca3af;'>" +
-                "        You can also access the board by logging into SegmentoRetro and navigating to your dashboard." +
+                "        This magic link will log you in automatically and take you directly to the board. The link will expire in 24 hours." +
                 "      </p>" +
                 "    </div>" +
                 "    " +
