@@ -116,8 +116,9 @@ public class TeamService {
                 TeamInvitation invitation = new TeamInvitation(email, token, team);
                 invitationRepository.save(invitation);
 
-                // Encode token for URL
-                String inviteLink = "http://localhost:5173/join?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
+                // Encode token and email for URL
+                String inviteLink = "http://localhost:5173/join?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8)
+                        + "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8);
 
                 // Send email with invitation link
                 emailService.sendInviteEmail(email, team.getName(), inviteLink);
@@ -134,7 +135,7 @@ public class TeamService {
     // Subsequent times: Auto-login and redirect to main page
     // =========================
     @Transactional
-    public Map<String, Object> acceptInvitation(String token, String name, String email) {
+    public Map<String, Object> acceptInvitation(String token, String name, String email, String password) {
         TeamInvitation invitation = invitationRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid or expired invitation link"));
 
@@ -158,16 +159,17 @@ public class TeamService {
             boolean alreadyInTeam = team.getMembers().contains(user);
             
             response.put("userExists", true);
-            response.put("isReturningUser", invitation.isAccepted()); // true if not first time
+            response.put("isReturningUser", invitation.isAccepted());
             response.put("userId", user.getId());
             response.put("name", user.getName());
+            response.put("email", user.getEmail());
             response.put("role", user.getRole());
             response.put("alreadyInTeam", alreadyInTeam);
             
             if (invitation.isAccepted()) {
                 // Second+ click → Just login
                 response.put("message", "Welcome back! Logging you in...");
-                response.put("action", "redirect"); // Frontend should redirect to main page
+                response.put("action", "redirect");
             } else {
                 // First click, existing user → Add to team
                 response.put("message", "Welcome! You've been added to the team.");
@@ -178,14 +180,15 @@ public class TeamService {
             response.put("token", jwtToken);
 
         } else {
+            // New user - password is required
+            if (password == null || password.trim().isEmpty()) {
+                throw new RuntimeException("Password is required for new users");
+            }
           
             user = new Users();
             user.setEmail(userEmail);
             user.setName(name != null ? name : "New User");
-            
-           
-            String tempPassword = UUID.randomUUID().toString().substring(0, 12);
-            user.setPassword(passwordEncoder.encode(tempPassword));
+            user.setPassword(passwordEncoder.encode(password));
             user.setRole(Role.MEMBER);
             user = userRepository.save(user);
 
@@ -193,24 +196,20 @@ public class TeamService {
             response.put("isReturningUser", false);
             response.put("userId", user.getId());
             response.put("name", user.getName());
+            response.put("email", user.getEmail());
             response.put("message", "Account created! Welcome to the team.");
-            response.put("requiresPasswordSetup", true);
             response.put("action", "redirect");
-            response.put("tempPassword", tempPassword); 
             
-        
             String jwtToken = jwtUtil.generateToken(user);
             response.put("token", jwtToken);
         }
 
-       
         Team team = invitation.getTeam();
         if (!team.getMembers().contains(user)) {
             team.getMembers().add(user);
             teamRepository.save(team);
         }
 
-       
         if (!invitation.isAccepted()) {
             invitation.setAccepted(true);
             invitationRepository.save(invitation);
@@ -253,11 +252,24 @@ public class TeamService {
         
         if (existingUser.isPresent()) {
             status.put("userName", existingUser.get().getName());
-            status.put("showLoginForm", invitation.isAccepted()); // If already accepted, just show login
+            status.put("showLoginForm", invitation.isAccepted()); 
         } else {
-            status.put("showRegistrationForm", !invitation.isAccepted()); // If not accepted, show registration
+            status.put("showRegistrationForm", !invitation.isAccepted()); 
         }
         
         return status;
+    }
+    
+    // Check if user exists by email
+    public Map<String, Object> checkUserExists(String email) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Users> user = userRepository.findByEmail(email);
+        
+        response.put("exists", user.isPresent());
+        if (user.isPresent()) {
+            response.put("name", user.get().getName());
+        }
+        
+        return response;
     }
 }

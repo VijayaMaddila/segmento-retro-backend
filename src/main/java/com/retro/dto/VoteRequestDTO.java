@@ -1,7 +1,12 @@
 package com.retro.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public class VoteRequestDTO {
+    @NotNull(message = "User ID is required")
     private Long userId;
+    
+    @NotNull(message = "Card ID is required")
     private Long cardId;
 
     public VoteRequestDTO() {}

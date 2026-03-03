@@ -36,7 +36,14 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/teams/accept-invite", "/api/teams/check-invite", "/api/test/**", "/actuator/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/teams/accept-invite").permitAll()
+                .requestMatchers("/api/teams/check-invite").permitAll()
+                .requestMatchers("/api/teams/check-user").permitAll()
+                .requestMatchers("/teams/**").permitAll()
+                .requestMatchers("/api/test/**").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/votes/**").permitAll() 
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

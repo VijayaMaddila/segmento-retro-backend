@@ -3,6 +3,7 @@ package com.retro.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,7 +65,9 @@ public class VoteService {
         System.out.println("Board ID: " + boardId);
 
       
-        if (voteRepository.existsByUser_IdAndCard_Id(userId, cardId)) {
+        Optional<Vote> existingVote = voteRepository.findByUser_IdAndCard_Id(userId, cardId);
+        if (existingVote.isPresent()) {
+            System.err.println("⚠️ Vote already exists with ID: " + existingVote.get().getId());
             throw new RuntimeException("You have already voted for this card");
         }
 
@@ -88,6 +91,8 @@ public class VoteService {
   
     @Transactional
     public VoteResponseDTO removeVote(Long userId, Long cardId) {
+        System.out.println("Removing vote - userId: " + userId + ", cardId: " + cardId);
+        
         // Get card to find board ID
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
@@ -98,7 +103,14 @@ public class VoteService {
         Vote vote = voteRepository.findByUser_IdAndCard_Id(userId, cardId)
                 .orElseThrow(() -> new RuntimeException("Vote not found"));
 
+        System.out.println("Found vote with ID: " + vote.getId() + ", deleting...");
         voteRepository.delete(vote);
+        voteRepository.flush(); // Force immediate deletion
+        System.out.println("✅ Vote deleted successfully");
+
+        // Verify deletion
+        boolean stillExists = voteRepository.existsByUser_IdAndCard_Id(userId, cardId);
+        System.out.println("Vote still exists after delete: " + stillExists);
 
         // Return response
         return buildVoteResponse(cardId, userId, boardId);

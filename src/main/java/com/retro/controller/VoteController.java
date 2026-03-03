@@ -22,27 +22,17 @@ public class VoteController {
 
     //add vote
     @PostMapping
-    public ResponseEntity<?> addVote(@RequestBody VoteRequestDTO request) {
-        try {
-            VoteResponseDTO response = voteService.addVote(request.getUserId(), request.getCardId());
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            System.err.println("Failed to add vote: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> addVote(@RequestBody @jakarta.validation.Valid VoteRequestDTO request) {
+        System.out.println("Received vote request - userId: " + request.getUserId() + ", cardId: " + request.getCardId());
+        VoteResponseDTO response = voteService.addVote(request.getUserId(), request.getCardId());
+        return ResponseEntity.ok(response);
     }
     //delete vote
     @DeleteMapping
-    public ResponseEntity<?> removeVote(@RequestBody VoteRequestDTO request) {
-        try {
-            VoteResponseDTO response = voteService.removeVote(request.getUserId(), request.getCardId());
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            System.err.println("Failed to remove vote: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> removeVote(@RequestBody @jakarta.validation.Valid VoteRequestDTO request) {
+        System.out.println("Received remove vote request - userId: " + request.getUserId() + ", cardId: " + request.getCardId());
+        VoteResponseDTO response = voteService.removeVote(request.getUserId(), request.getCardId());
+        return ResponseEntity.ok(response);
     }
 
     //get vote
@@ -58,10 +48,7 @@ public class VoteController {
         }
     }
 
-    /**
-     * Get remaining votes for a user on a board
-     * GET /api/votes/board/{boardId}/user/{userId}/remaining
-     */
+   
     @GetMapping("/board/{boardId}/user/{userId}/remaining")
     public ResponseEntity<Long> getRemainingVotes(
             @PathVariable Long boardId,
@@ -84,5 +71,18 @@ public class VoteController {
             @PathVariable Long userId) {
         List<Vote> votes = voteService.getUserBoardVotes(userId, boardId);
         return ResponseEntity.ok(votes);
+    }
+
+    
+    @DeleteMapping("/force/{userId}/{cardId}")
+    public ResponseEntity<?> forceDeleteVote(
+            @PathVariable Long userId,
+            @PathVariable Long cardId) {
+        try {
+            voteService.removeVote(userId, cardId);
+            return ResponseEntity.ok(Map.of("message", "Vote deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.ok(Map.of("message", "Vote not found or already deleted"));
+        }
     }
 }

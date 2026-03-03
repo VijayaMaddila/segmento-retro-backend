@@ -103,7 +103,7 @@ public class BoardController {
         return ResponseEntity.ok(boardService.updateBoard(id, boardDto));
     }
 
-    // ── DELETE board ──
+    //DELETE board
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteBoard(@PathVariable Long id) {
         boardService.deleteBoard(id);
