@@ -36,14 +36,9 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/teams/accept-invite").permitAll()
-                .requestMatchers("/api/teams/check-invite").permitAll()
-                .requestMatchers("/api/teams/check-user").permitAll()
-                .requestMatchers("/teams/**").permitAll()
-                .requestMatchers("/api/test/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/api/votes/**").permitAll() 
+                
+                .requestMatchers("/", "/api/auth/**", "/api/test/**", "/actuator/**").permitAll()
+                // Keep JWT security for everything else
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -56,6 +51,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
