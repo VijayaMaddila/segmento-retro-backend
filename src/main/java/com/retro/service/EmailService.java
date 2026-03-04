@@ -248,7 +248,7 @@ public class EmailService {
                 "    </div>" +
                 "    " +
                 "    <div class='email-footer'>" +
-                "      <p>© 2024 SegmentoRetro. All rights reserved.</p>" +
+                "      <p>© 2026 SegmentoRetro. All rights reserved.</p>" +
                 "      <p>This is an automated notification. Please do not reply to this email.</p>" +
                 "    </div>" +
                 "  </div>" +
