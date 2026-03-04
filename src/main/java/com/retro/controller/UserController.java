@@ -11,7 +11,7 @@ import com.retro.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("https://segmento-retro-omega.vercel.app/")
 public class UserController {
 
     @Autowired

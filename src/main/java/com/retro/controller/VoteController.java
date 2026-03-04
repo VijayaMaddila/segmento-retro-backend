@@ -14,7 +14,7 @@ import com.retro.service.VoteService;
 
 @RestController
 @RequestMapping("/api/votes")
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("https://segmento-retro-omega.vercel.app/")
 public class VoteController {
 
     @Autowired

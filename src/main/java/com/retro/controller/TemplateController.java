@@ -22,7 +22,7 @@ import com.retro.repository.TemplateRepository;
 
 @RestController
 @RequestMapping("/api/templates")
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("https://segmento-retro-omega.vercel.app/")
 public class TemplateController {
 
     @Autowired
@@ -77,6 +77,8 @@ public class TemplateController {
     public List<Template> getDefaultTemplates() {
         return templateRepository.findByIsDefaultTrue();
     }
+
+    
 
     @PutMapping("/{id}")
     public Template updateTemplate(@PathVariable Long id, @RequestBody TemplateDTO templateDto) {

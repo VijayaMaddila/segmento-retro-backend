@@ -11,6 +11,7 @@ import com.retro.service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin("https://segmento-retro-omega.vercel.app/")
 public class AuthController {
 
     @Autowired

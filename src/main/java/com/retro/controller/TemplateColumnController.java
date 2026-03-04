@@ -17,7 +17,7 @@ import com.retro.repository.TemplateRepository;
 
 @RestController
 @RequestMapping("/api/template-columns")
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("https://segmento-retro-omega.vercel.app/")
 public class TemplateColumnController {
 
     @Autowired
