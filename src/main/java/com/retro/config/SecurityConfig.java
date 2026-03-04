@@ -36,9 +36,9 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("/", "/api/auth/**", "/actuator/**").permitAll()
-                // Add more public endpoints if needed
+                
+                .requestMatchers("/", "/actuator/**", "/api/auth/**").permitAll()
+                // all other APIs require JWT
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
