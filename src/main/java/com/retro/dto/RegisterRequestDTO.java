@@ -1,9 +1,12 @@
 package com.retro.dto;
 
+import com.retro.model.Users.Role;
+
 public class RegisterRequestDTO {
 	private String name;
 	private String email;
 	private String password;
+	private Role role;
 	public String getName() {
 		return name;
 	}
@@ -21,6 +24,13 @@ public class RegisterRequestDTO {
 	}
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	public Role getRole() {
+		
+		return role;
+	}
+	public void setRole(Role role) {
+		this.role = role;
 	}
 	
 	
