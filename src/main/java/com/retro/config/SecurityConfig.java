@@ -38,7 +38,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 
                 .requestMatchers("/", "/api/auth/**", "/api/test/**", "/actuator/**").permitAll()
-                // Keep JWT security for everything else
+                // Everything else requires JWT
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

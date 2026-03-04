@@ -18,7 +18,7 @@ import java.security.Key;
 @Component
 public class JwtUtil {
 
-    private final String secret = "mysecretkeymysecretkeymysecretkey"; // 256-bit
+    private final String secret = "mysecretkeymysecretkeymysecretkey"; 
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
