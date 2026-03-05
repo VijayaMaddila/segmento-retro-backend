@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "votes", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_id", "card_id"})
 })
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class Vote {
 
     @Id
