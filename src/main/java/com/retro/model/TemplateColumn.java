@@ -1,46 +1,37 @@
 package com.retro.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name="template_columns")
+@Table(name = "template_columns", indexes = {
+    @Index(name = "idx_template_column_template_id", columnList = "template_id"),           // fetch columns by template
+    @Index(name = "idx_template_column_position", columnList = "template_id, position")     // ⭐ ordered columns by template
+})
 public class TemplateColumn {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String name;
 
     private Integer position;
 
-    @ManyToOne
-    @JoinColumn(name="template_id")
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "template_id")
     @JsonBackReference
     private Template template;
 
-    public TemplateColumn()
-    {
-    	
-    }
+    public TemplateColumn() {}
 
-	public TemplateColumn(Long id, String name, Integer position, Template template) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.position = position;
-		this.template = template;
-	}
+    public TemplateColumn(Long id, String name, Integer position, Template template) {
+        this.id = id;
+        this.name = name;
+        this.position = position;
+        this.template = template;
+    }
 
 	public Long getId() {
 		return id;

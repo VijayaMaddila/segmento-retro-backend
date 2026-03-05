@@ -2,15 +2,18 @@ package com.retro.model;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "cards")
+@Table(name = "cards", indexes = {
+    @Index(name = "idx_card_board_column_id", columnList = "board_column_id"),            
+    @Index(name = "idx_card_created_by", columnList = "created_by"),                        
+    @Index(name = "idx_card_deleted", columnList = "deleted"),                              
+    @Index(name = "idx_card_column_deleted", columnList = "board_column_id, deleted")       
+})
 public class Card {
 
     @Id
@@ -20,37 +23,34 @@ public class Card {
     @Column(nullable = false)
     private String content;
 
-    
-    @ManyToOne
-    @JsonBackReference(value = "column-cards") 
+    @ManyToOne(fetch = FetchType.LAZY)  
+    @JsonBackReference(value = "column-cards")
     @JoinColumn(name = "board_column_id")
     private BoardColumn boardColumn;
 
-    @ManyToOne
-    @JsonIgnore 
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JsonIgnore
     @JoinColumn(name = "created_by")
     private Users createdBy;
 
-    
-    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) 
     @JsonManagedReference(value = "card-comments")
     private List<Comment> comments = new ArrayList<>();
 
-    @Column(nullable=false)
-   private boolean deleted=false;
-    
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     public Card() {}
 
-    public Card(Long id, String content, BoardColumn boardColumn, Users createdBy, List<Comment> comments,
-			boolean deleted) {
-		super();
-		this.id = id;
-		this.content = content;
-		this.boardColumn = boardColumn;
-		this.createdBy = createdBy;
-		this.comments = comments;
-		this.deleted = deleted;
-	}
+    public Card(Long id, String content, BoardColumn boardColumn, Users createdBy,
+                List<Comment> comments, boolean deleted) {
+        this.id = id;
+        this.content = content;
+        this.boardColumn = boardColumn;
+        this.createdBy = createdBy;
+        this.comments = comments;
+        this.deleted = deleted;
+    }
 
 	public Long getId() {
 		return id;

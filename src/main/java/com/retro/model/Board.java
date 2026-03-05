@@ -2,52 +2,55 @@ package com.retro.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="boards")
+@Table(name = "boards", indexes = {
+    @Index(name = "idx_board_created_by", columnList = "created_by"),
+    @Index(name = "idx_board_team_id", columnList = "team_id"),
+    @Index(name = "idx_board_deleted", columnList = "deleted"),
+    @Index(name = "idx_board_team_deleted", columnList = "team_id, deleted"),    
+    @Index(name = "idx_board_created_by_deleted", columnList = "created_by, deleted") 
+})
 public class Board {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String title;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name="created_by") 
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY) 
+    @JoinColumn(name = "created_by")
     private Users createdBy;
 
-    @ManyToOne
-    @JoinColumn(name="team_id")
-    private Team team; 
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "team_id")
+    private Team team;
 
     private LocalDateTime createdAt = LocalDateTime.now();
-    
-    @Column(nullable=false)
-    private boolean deleted=false;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     @JsonManagedReference(value = "board-columns")
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // ✅ LAZY
     private List<BoardColumn> columns;
 
     public Board() {}
 
-	public Board(Long id, String title, Users createdBy, Team team, LocalDateTime createdAt, boolean deleted,
-			List<BoardColumn> columns) {
-		super();
-		this.id = id;
-		this.title = title;
-		this.createdBy = createdBy;
-		this.team = team;
-		this.createdAt = createdAt;
-		this.deleted = deleted;
-		this.columns = columns;
-	}
+    public Board(Long id, String title, Users createdBy, Team team,
+                 LocalDateTime createdAt, boolean deleted, List<BoardColumn> columns) {
+        this.id = id;
+        this.title = title;
+        this.createdBy = createdBy;
+        this.team = team;
+        this.createdAt = createdAt;
+        this.deleted = deleted;
+        this.columns = columns;
+    }
 
 	public Long getId() {
 		return id;

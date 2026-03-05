@@ -9,7 +9,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_users_email", columnList = "email", unique = true), 
+    @Index(name = "idx_users_team_id", columnList = "team_id"),             
+    @Index(name = "idx_users_role", columnList = "role")                    
+})
 public class Users implements UserDetails {
 
     @Id
@@ -20,9 +24,9 @@ public class Users implements UserDetails {
     private String email;
 
     private String name;
-    
+
     private String password;
-    
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -31,13 +35,12 @@ public class Users implements UserDetails {
         ADMIN, MEMBER
     }
 
-    // User -> Team
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)  
     @JoinColumn(name = "team_id")
     @JsonBackReference(value = "team-users")
     private Team team;
 
-    @OneToMany(mappedBy = "createdBy")
+    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)  
     @JsonBackReference(value = "user-boards")
     private List<Board> boards;
 

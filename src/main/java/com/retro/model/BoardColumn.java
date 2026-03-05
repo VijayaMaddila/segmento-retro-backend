@@ -2,14 +2,16 @@ package com.retro.model;
 
 import jakarta.persistence.*;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-
 @Entity
-@Table(name = "board_columns")
+@Table(name = "board_columns", indexes = {
+    @Index(name = "idx_column_board_id", columnList = "board_id"),                  // fetch columns by board
+    @Index(name = "idx_column_deleted", columnList = "deleted"),                    // filter active columns
+    @Index(name = "idx_column_board_deleted", columnList = "board_id, deleted"),    // ⭐ most used
+    @Index(name = "idx_column_position", columnList = "board_id, position")         // ⭐ ordering columns
+})
 public class BoardColumn {
 
     @Id
@@ -21,33 +23,27 @@ public class BoardColumn {
 
     private int position;
 
-    
-    @ManyToOne
-    @JsonBackReference(value = "board-columns") 
-    @JoinColumn(name = "board_id",nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)  // ✅ LAZY - don't load full Board with every column
+    @JsonBackReference(value = "board-columns")
+    @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
-    
-    @OneToMany(mappedBy = "boardColumn", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "column-cards") 
+    @OneToMany(mappedBy = "boardColumn", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // ✅ LAZY
+    @JsonManagedReference(value = "column-cards")
     private List<Card> cards;
 
-    
-    private Boolean deleted=false;
-    
-    
+    private Boolean deleted = false;
+
     public BoardColumn() {}
 
-
-	public BoardColumn(Long id, String title, int position, Board board, List<Card> cards, Boolean deleted) {
-		super();
-		this.id = id;
-		this.title = title;
-		this.position = position;
-		this.board = board;
-		this.cards = cards;
-		this.deleted = deleted;
-	}
+    public BoardColumn(Long id, String title, int position, Board board, List<Card> cards, Boolean deleted) {
+        this.id = id;
+        this.title = title;
+        this.position = position;
+        this.board = board;
+        this.cards = cards;
+        this.deleted = deleted;
+    }
 
 
 	public Long getId() {

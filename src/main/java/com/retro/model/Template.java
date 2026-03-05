@@ -2,21 +2,25 @@ package com.retro.model;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="templates")
+@Table(name = "templates", indexes = {
+    @Index(name = "idx_template_category", columnList = "category"),                   
+    @Index(name = "idx_template_language", columnList = "language"),                    
+    @Index(name = "idx_template_is_default", columnList = "is_default"),              
+    @Index(name = "idx_template_is_deleted", columnList = "is_deleted"),               
+    @Index(name = "idx_template_category_deleted", columnList = "category, is_deleted"),
+    @Index(name = "idx_template_default_deleted", columnList = "is_default, is_deleted")
+})
 public class Template {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false, length=255)
+    @Column(nullable = false, length = 255)
     private String title;
 
     @Column(columnDefinition = "TEXT")
@@ -36,15 +40,16 @@ public class Template {
     private Boolean isDeleted = false;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // ✅ LAZY
     private List<TemplateColumn> columns = new ArrayList<>();
+
     public Template() {}
-	public Template(Long id, String title, List<TemplateColumn> columns) {
-		super();
-		this.id = id;
-		this.title = title;
-		this.columns = columns;
-	}
+
+    public Template(Long id, String title, List<TemplateColumn> columns) {
+        this.id = id;
+        this.title = title;
+        this.columns = columns;
+    }
 	public Long getId() {
 		return id;
 	}

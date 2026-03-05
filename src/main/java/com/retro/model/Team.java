@@ -4,7 +4,11 @@ import java.util.List;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "teams")
+@Table(name = "teams", indexes = {
+    @Index(name = "idx_team_created_by", columnList = "created_by"),        
+    @Index(name = "idx_team_deleted", columnList = "deleted"),              
+    @Index(name = "idx_team_created_by_deleted", columnList = "created_by, deleted")
+})
 public class Team {
 
     @Id
@@ -14,11 +18,11 @@ public class Team {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "created_by")
     private Users createdBy;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY) 
     @JoinTable(
         name = "team_members",
         joinColumns = @JoinColumn(name = "team_id"),
@@ -32,7 +36,6 @@ public class Team {
     public Team() {}
 
     public Team(Long id, String name, Users createdBy, List<Users> members, boolean deleted) {
-        super();
         this.id = id;
         this.name = name;
         this.createdBy = createdBy;
