@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "votes", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_id", "card_id"})
 })

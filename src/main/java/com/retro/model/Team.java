@@ -4,6 +4,7 @@ import java.util.List;
 import jakarta.persistence.*;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "teams", indexes = {
     @Index(name = "idx_team_created_by", columnList = "created_by"),        
     @Index(name = "idx_team_deleted", columnList = "deleted"),              

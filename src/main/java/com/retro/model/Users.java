@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "users", indexes = {
     @Index(name = "idx_users_email", columnList = "email", unique = true), 
     @Index(name = "idx_users_team_id", columnList = "team_id"),             

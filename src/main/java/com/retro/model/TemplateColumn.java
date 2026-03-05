@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "template_columns", indexes = {
     @Index(name = "idx_template_column_template_id", columnList = "template_id"),           // fetch columns by template
     @Index(name = "idx_template_column_position", columnList = "template_id, position")     // ⭐ ordered columns by template

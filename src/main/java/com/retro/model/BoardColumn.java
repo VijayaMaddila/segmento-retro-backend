@@ -6,11 +6,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "board_columns", indexes = {
-    @Index(name = "idx_column_board_id", columnList = "board_id"),                  // fetch columns by board
-    @Index(name = "idx_column_deleted", columnList = "deleted"),                    // filter active columns
-    @Index(name = "idx_column_board_deleted", columnList = "board_id, deleted"),    // ⭐ most used
-    @Index(name = "idx_column_position", columnList = "board_id, position")         // ⭐ ordering columns
+    @Index(name = "idx_column_board_id", columnList = "board_id"),                  
+    @Index(name = "idx_column_deleted", columnList = "deleted"),                    
+    @Index(name = "idx_column_board_deleted", columnList = "board_id, deleted"),    
+    @Index(name = "idx_column_position", columnList = "board_id, position")         
 })
 public class BoardColumn {
 
@@ -23,7 +24,7 @@ public class BoardColumn {
 
     private int position;
 
-    @ManyToOne(fetch = FetchType.LAZY)  // ✅ LAZY - don't load full Board with every column
+    @ManyToOne(fetch = FetchType.LAZY)  
     @JsonBackReference(value = "board-columns")
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;

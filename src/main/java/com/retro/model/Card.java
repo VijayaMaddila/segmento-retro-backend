@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "cards", indexes = {
     @Index(name = "idx_card_board_column_id", columnList = "board_column_id"),            
     @Index(name = "idx_card_created_by", columnList = "created_by"),                        

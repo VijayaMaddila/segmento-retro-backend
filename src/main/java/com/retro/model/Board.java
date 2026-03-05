@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "boards", indexes = {
     @Index(name = "idx_board_created_by", columnList = "created_by"),
     @Index(name = "idx_board_team_id", columnList = "team_id"),
@@ -34,6 +35,7 @@ public class Board {
 
     @Column(nullable = false)
     private boolean deleted = false;
+
 
     @JsonManagedReference(value = "board-columns")
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // ✅ LAZY

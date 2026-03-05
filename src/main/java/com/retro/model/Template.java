@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "templates", indexes = {
     @Index(name = "idx_template_category", columnList = "category"),                   
     @Index(name = "idx_template_language", columnList = "language"),                    
