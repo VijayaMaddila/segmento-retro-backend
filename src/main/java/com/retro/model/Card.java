@@ -31,7 +31,6 @@ public class Card {
     private BoardColumn boardColumn;
 
     @ManyToOne(fetch = FetchType.LAZY) 
-    @JsonIgnore
     @JoinColumn(name = "created_by")
     private Users createdBy;
 
