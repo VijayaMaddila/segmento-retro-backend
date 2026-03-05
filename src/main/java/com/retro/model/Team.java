@@ -2,6 +2,7 @@ package com.retro.model;
 
 import java.util.List;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
