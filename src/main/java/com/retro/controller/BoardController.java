@@ -21,7 +21,6 @@ import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("/api/boards")
-@CrossOrigin("https://segmento-retro-omega.vercel.app/")
 public class BoardController {
 
     @Autowired
@@ -53,8 +52,6 @@ public class BoardController {
     public ResponseEntity<Board> getBoardById(@PathVariable Long id) {
         return ResponseEntity.ok(boardService.getBoardById(id));
     }
-
-   
 
     //CREATE a new board
     @PostMapping
@@ -109,6 +106,7 @@ public class BoardController {
         boardService.deleteBoard(id);
         return ResponseEntity.ok("Board deleted successfully.");
     }
+    
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Board>> getUserBoards(@PathVariable Long userId) {
         Users user = userRepository.findById(userId)

@@ -72,4 +72,10 @@ public class CardService {
         card.setContent(content);
         return cardRepository.save(card);
     }
+
+    //GET CARD BY ID
+    public Card getCardById(Long cardId) {
+        return cardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+    }
 }
