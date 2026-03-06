@@ -21,6 +21,7 @@ import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("/api/boards")
+@CrossOrigin("https://segmento-retro-omega.vercel.app/")
 public class BoardController {
 
     @Autowired
