@@ -13,7 +13,7 @@ import com.retro.service.BoardColumnService;
 
 @RestController
 @RequestMapping("/api/board-columns")
-@CrossOrigin("https://segmento-retro-omega.vercel.app/")
+@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class BoardColumnController {
 
     @Autowired

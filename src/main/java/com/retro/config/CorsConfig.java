@@ -17,7 +17,8 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                                 
-                                "https://segmento-retro-omega.vercel.app/"
+                                "http://localhost:3000", 
+                            "https://your-deployed-domain.com"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")

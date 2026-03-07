@@ -12,7 +12,7 @@ import com.retro.service.TeamService;
 
 @RestController
 @RequestMapping("/api/teams")
-@CrossOrigin("https://segmento-retro-omega.vercel.app/")
+@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class TeamController {
 
     @Autowired

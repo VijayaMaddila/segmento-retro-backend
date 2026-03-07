@@ -18,7 +18,7 @@ import com.retro.repository.TemplateRepository;
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @RestController
 @RequestMapping("/api/template-columns")
-@CrossOrigin("https://segmento-retro-omega.vercel.app/")
+@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class TemplateColumnController {
 
     @Autowired
