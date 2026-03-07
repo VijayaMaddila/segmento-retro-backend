@@ -48,7 +48,7 @@ public class CommentService {
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
 
-        return commentRepository.findByCardAndDeletedFalse(card);
+        return commentRepository.findByCard_IdAndDeletedFalse(cardId);
     }
 
     //UPDATE COMMENT
