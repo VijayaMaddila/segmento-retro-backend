@@ -1,5 +1,6 @@
 package com.retro.repository;
 
+
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,20 +13,20 @@ import com.retro.model.Users;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-    
+   
     List<Board> findByDeletedFalse();
 
-
+   
     List<Board> findByCreatedByAndDeletedFalse(Users user);
 
-    
-    List<Board> findByCreatedBy_IdAndDeletedFalse(Long userId);
+  
+    List<Board> findByCreatedBy_Id(Long userId);
 
-    
-    List<Board> findByTeamAndDeletedFalse(Team team);
-
-    
+   
     List<Board> findByTeamInAndDeletedFalse(List<Team> teams);
+
+   
+    List<Board> findByTeam(Team team);
 
     
     @Query("""
@@ -33,8 +34,10 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
         WHERE b.deleted = false
         AND (b.createdBy = :user OR b.team IN :teams)
     """)
-    List<Board> findAccessibleBoards(
-            @Param("user") Users user,
-            @Param("teams") List<Team> teams
-    );
+    List<Board> findAccessibleBoards(@Param("user") Users user,
+                                     @Param("teams") List<Team> teams);
+
+	List<Board> findByCreatedBy_IdAndDeletedFalse(Long userId);
+
+	List<Board> findByTeamAndDeletedFalse(Team team);
 }
