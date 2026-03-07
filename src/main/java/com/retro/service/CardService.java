@@ -26,15 +26,12 @@ public class CardService {
     @Autowired
     private UserRepository userRepository;
 
-    //CREATE CARD
+    // CREATE CARD
     @Transactional
     public Card createCard(Long boardColumnId, Long userId, String content) {
-
-        BoardColumn column = boardColumnRepository.findById(boardColumnId)
-                .orElseThrow(() -> new RuntimeException("BoardColumn not found"));
-
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        BoardColumn column = boardColumnRepository.getReferenceById(boardColumnId);
+        Users user         = userRepository.getReferenceById(userId);
 
         Card card = new Card();
         card.setContent(content);
@@ -44,38 +41,40 @@ public class CardService {
         return cardRepository.save(card);
     }
 
- //GET CARDS BY BOARD
+    // GET CARDS BY BOARD 
     public List<Card> getBoardCards(Long boardId) {
-        return cardRepository
-            .findByBoardColumn_Board_IdAndDeletedFalse(boardId);
+        return cardRepository.findByBoardIdAndDeletedFalse(boardId);
+
     }
 
-    //GET CARDS BY COLUMN 
+    // GET CARDS BY COLUMN 
     public List<Card> getColumnCards(Long columnId) {
-        return cardRepository
-            .findByBoardColumn_IdAndDeletedFalse(columnId);
+        return cardRepository.findByColumnIdAndDeletedFalse(columnId);
     }
-    //DELETE CARD
+
+    // DELETE CARD
     @Transactional
     public void deleteCard(Long cardId) {
-        Card card=cardRepository.findById(cardId)
-        		.orElseThrow(()->new RuntimeException("Card not found:"+cardId));
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
         card.setDeleted(true);
-        cardRepository.save(card);
+        
     }
 
-    //UPDATE CARD
+    // UPDATE CARD
     @Transactional
     public Card updateCard(Long cardId, String content) {
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
         card.setContent(content);
-        return cardRepository.save(card);
+    
+        return card;
     }
 
-    //GET CARD BY ID
+    // GET CARD BY ID
     public Card getCardById(Long cardId) {
         return cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
     }
+
 }

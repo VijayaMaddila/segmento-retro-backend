@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.retro.model.Board;
 import com.retro.model.BoardColumn;
-import com.retro.model.Card;
 import com.retro.repository.BoardColumnRepository;
 import com.retro.repository.BoardRepository;
 import com.retro.repository.CardRepository;
@@ -29,51 +28,37 @@ public class BoardColumnService {
     // ADD COLUMN
     @Transactional
     public BoardColumn addColumn(Long boardId, BoardColumn column) {
-
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new RuntimeException("Board not found"));
-
-        column.setBoard(board);
+        column.setBoard(boardRepository.getReferenceById(boardId));
         column.setDeleted(false);
-
         return boardColumnRepository.save(column);
     }
 
-    //GET COLUMNS
+    // GET COLUMNS BY BOARD
     public List<BoardColumn> getColumnsByBoard(Long boardId) {
-
-        return boardColumnRepository
-                .findByBoard_IdAndDeletedFalse(boardId);
+        return boardColumnRepository.findByBoard_IdAndDeletedFalse(boardId);
     }
 
-    //UPDATE COLUMN NAME
+    // UPDATE COLUMN NAME
     @Transactional
     public BoardColumn updateColumnName(Long columnId, String newTitle) {
-
         BoardColumn column = boardColumnRepository
                 .findByIdAndDeletedFalse(columnId)
                 .orElseThrow(() -> new RuntimeException("Column not found"));
-
         column.setTitle(newTitle);
-
+        
         return column;
     }
 
-    //SOFT DELETE COLUMN
+    // SOFT DELETE COLUMN
     @Transactional
     public void deleteColumn(Long columnId) {
-
         BoardColumn column = boardColumnRepository
                 .findByIdAndDeletedFalse(columnId)
                 .orElseThrow(() -> new RuntimeException("Column not found"));
 
         column.setDeleted(true);
 
-        List<Card> cards = cardRepository
-                .findByBoardColumn_IdAndDeletedFalse(columnId);
-
-        for (Card card : cards) {
-            card.setDeleted(true);
-        }
+        
+        cardRepository.softDeleteByColumnId(columnId);
     }
 }

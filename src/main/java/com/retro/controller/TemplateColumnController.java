@@ -1,51 +1,40 @@
 package com.retro.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.retro.dto.TemplateColumnDTO;
-import com.retro.model.Template;
 import com.retro.model.TemplateColumn;
-import com.retro.repository.TemplateColumnRepository;
-import com.retro.repository.TemplateRepository;
-@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+import com.retro.service.TemplateColumnService;
+
 @RestController
 @RequestMapping("/api/template-columns")
 public class TemplateColumnController {
 
     @Autowired
-    private TemplateColumnRepository templateColumnRepository;
+    private TemplateColumnService templateColumnService;
 
-    @Autowired
-    private TemplateRepository templateRepository;
-
-    // Add a column to a template
+    // ADD COLUMN TO TEMPLATE
     @PostMapping("/{templateId}")
-    public TemplateColumn addColumn(@PathVariable Long templateId,
-                                    @RequestBody TemplateColumnDTO columnDto) {
-
-        Template template = templateRepository.findById(templateId)
-                .orElseThrow(() -> new RuntimeException("Template not found"));
-
-        TemplateColumn column = new TemplateColumn();
-        column.setName(columnDto.getName());
-        column.setPosition(columnDto.getPosition());
-        column.setTemplate(template);
-
-        return templateColumnRepository.save(column);
+    public ResponseEntity<TemplateColumn> addColumn(@PathVariable Long templateId,
+                                                     @RequestBody TemplateColumnDTO columnDto) {
+        TemplateColumn column = templateColumnService.addColumn(
+                templateId,
+                columnDto.getName(),
+                columnDto.getPosition()
+        );
+        return ResponseEntity.ok(column);
     }
 
-    // Delete a column
+    // DELETE COLUMN
     @DeleteMapping("/{id}")
-    public String deleteColumn(@PathVariable Long id) {
-        templateColumnRepository.deleteById(id);
-        return "Template column deleted successfully";
+    public ResponseEntity<String> deleteColumn(@PathVariable Long id) {
+        try {
+            templateColumnService.deleteColumn(id);
+            return ResponseEntity.ok("Template column deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

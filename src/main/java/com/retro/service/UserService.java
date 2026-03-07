@@ -16,33 +16,34 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // GET all users
+    // GET ALL USERS
     public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // GET user by ID
+    // GET USER BY ID
     public Users getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    // GET user by email
+    // GET USER BY EMAIL
     public Users getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 
-    // CREATE user
+    // CREATE USER
     @Transactional
     public Users createUser(Users user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+        
+        if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
         return userRepository.save(user);
     }
 
-    // UPDATE user
+    // UPDATE USER
     @Transactional
     public Users updateUser(Long id, Users user) {
         Users existingUser = userRepository.findById(id)
@@ -50,12 +51,13 @@ public class UserService {
 
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
-        existingUser.setPassword(user.getPassword()); // ideally hash password
+        existingUser.setPassword(user.getPassword());
 
-        return userRepository.save(existingUser);
+        
+        return existingUser;
     }
 
-    // DELETE user
+    // DELETE USER
     @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
