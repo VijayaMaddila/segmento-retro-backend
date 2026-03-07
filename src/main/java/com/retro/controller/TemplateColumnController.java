@@ -9,12 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.retro.dto.TemplateColumnDTO;
 import com.retro.model.Template;
 import com.retro.model.TemplateColumn;
 import com.retro.repository.TemplateColumnRepository;
 import com.retro.repository.TemplateRepository;
-
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @RestController
 @RequestMapping("/api/template-columns")
 @CrossOrigin("https://segmento-retro-omega.vercel.app/")

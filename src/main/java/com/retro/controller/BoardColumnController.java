@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.retro.dto.ColumnRequestDTO;
 import com.retro.dto.UpdatedColumnRequestDTO;
-import com.retro.model.Board;
 import com.retro.model.BoardColumn;
-import com.retro.repository.BoardColumnRepository;
-import com.retro.repository.BoardRepository;
 import com.retro.service.BoardColumnService;
 
 @RestController
