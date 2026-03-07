@@ -10,7 +10,6 @@ import com.retro.service.TeamService;
 
 @RestController
 @RequestMapping("/teams")
-@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class PublicInvitationController {
 
     @Autowired

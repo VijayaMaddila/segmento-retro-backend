@@ -13,7 +13,6 @@ import com.retro.service.BoardColumnService;
 
 @RestController
 @RequestMapping("/api/board-columns")
-@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class BoardColumnController {
 
     @Autowired

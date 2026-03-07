@@ -12,7 +12,6 @@ import com.retro.service.CardService;
 
 @RestController
 @RequestMapping("/api/cards")
-@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class CardController {
 
     @Autowired

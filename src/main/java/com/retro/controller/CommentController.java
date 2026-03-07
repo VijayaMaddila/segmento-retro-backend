@@ -12,7 +12,6 @@ import com.retro.service.CommentService;
 
 @RestController
 @RequestMapping("/api/comments")
-@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class CommentController {
 
     @Autowired

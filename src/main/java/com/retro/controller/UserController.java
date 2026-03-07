@@ -11,7 +11,6 @@ import com.retro.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class UserController {
 
     @Autowired

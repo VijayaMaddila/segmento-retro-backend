@@ -13,17 +13,15 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-
                 registry.addMapping("/**")
                         .allowedOrigins(
-                                
-                                "http://localhost:3000", 
-                            "https://your-deployed-domain.com"
+                            "http://localhost:5173",                // local dev
+                            "https://your-production-domain.com"   // production
                         )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("GET","POST","PUT","DELETE","OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
         };
     }
-  }
+}

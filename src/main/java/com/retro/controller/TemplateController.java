@@ -22,7 +22,6 @@ import com.retro.repository.TemplateRepository;
 
 @RestController
 @RequestMapping("/api/templates")
-@CrossOrigin(origins = {"http://localhost:5173/", "https://your-production-domain.com/"})
 public class TemplateController {
 
     @Autowired
