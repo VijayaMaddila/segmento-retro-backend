@@ -12,6 +12,7 @@ import com.retro.service.CardService;
 
 @RestController
 @RequestMapping("/api/cards")
+@CrossOrigin("https://segmento-retro-omega.vercel.app/")
 public class CardController {
 
     @Autowired

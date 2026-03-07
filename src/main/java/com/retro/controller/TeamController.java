@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.retro.dto.TeamDTO;
-import com.retro.repository.TeamInvitationRepository;
 import com.retro.service.TeamService;
 
 @RestController
