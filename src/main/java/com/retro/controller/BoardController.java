@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,8 +45,10 @@ public class BoardController {
 
     //GET all boards 
     @GetMapping
-    public ResponseEntity<List<Board>> getAllBoards() {
-        return ResponseEntity.ok(boardService.getAllBoards());
+    public ResponseEntity<Page<Board>> getAllBoards(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(boardService.getAllBoards(PageRequest.of(page, size)));
     }
 
     //GET board by id
@@ -107,29 +111,25 @@ public class BoardController {
         return ResponseEntity.ok("Board deleted successfully.");
     }
     
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Board>> getUserBoards(@PathVariable Long userId) {
-        Users user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        List<Board> boards;
-        
-        if (Users.Role.MEMBER.equals(user.getRole())) {
-            
-            List<Team> userTeams = teamRepository.findByMembersContainingAndDeletedFalse(user);
-            boards = new ArrayList<>();
-            for (Team team : userTeams) {
-                boards.addAll(boardRepository.findByTeamAndDeletedFalse(team));
+    
+        @GetMapping("/user/{userId}")
+        public ResponseEntity<List<Board>> getUserBoards(@PathVariable Long userId) {
+            Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+            List<Board> boards;
+
+            if (Users.Role.MEMBER.equals(user.getRole())) {
+                // Optimized: Single query with JOIN FETCH instead of N+1
+                boards = boardRepository.findByTeamMemberIdWithTeam(userId);
+            } else {
+                // Optimized: Two queries instead of N+1
+                boards = new ArrayList<>(boardRepository.findByCreatedByIdWithTeam(userId));
+                boards.addAll(boardRepository.findByTeamMemberIdWithTeam(userId));
             }
-        } else {
-         
-            boards = new ArrayList<>(boardRepository.findByCreatedBy_IdAndDeletedFalse(userId));
-            List<Team> userTeams = teamRepository.findByMembersContainingAndDeletedFalse(user);
-            for (Team team : userTeams) {
-                boards.addAll(boardRepository.findByTeamAndDeletedFalse(team));
-            }
+
+            return ResponseEntity.ok(boards);
         }
-        
-        return ResponseEntity.ok(boards);
-    }
+
+
 }

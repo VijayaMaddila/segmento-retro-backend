@@ -3,6 +3,7 @@ package com.retro.service;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -10,6 +11,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.AddressException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class EmailService {
@@ -45,7 +47,8 @@ public class EmailService {
         }
     }
     
-    public void sendBoardCreationEmail(
+    @Async("emailTaskExecutor")
+    public CompletableFuture<Void> sendBoardCreationEmail(
             String recipientEmail,
             String recipientName,
             String boardTitle,
@@ -84,6 +87,7 @@ public class EmailService {
             System.out.println("Sending board creation email to: " + recipientEmail);
             mailSender.send(message);
             System.out.println("✅ Board creation email sent successfully to: " + recipientEmail);
+            return CompletableFuture.completedFuture(null);
         } catch (Exception e) {
             System.err.println("❌ Failed to send board creation email to: " + recipientEmail + " - " + e.getMessage());
             throw new MessagingException("Failed to send email: " + e.getMessage());

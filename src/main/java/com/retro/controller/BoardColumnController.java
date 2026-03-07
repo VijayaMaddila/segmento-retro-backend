@@ -13,6 +13,7 @@ import com.retro.service.BoardColumnService;
 
 @RestController
 @RequestMapping("/api/board-columns")
+
 public class BoardColumnController {
 
     @Autowired

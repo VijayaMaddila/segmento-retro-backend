@@ -134,17 +134,28 @@ public class VoteService {
     }
 
     
-    public Map<Long, Long> getBoardVotes(Long boardId) {
-        List<Card> cards = cardRepository.findByBoardColumn_Board_IdAndDeletedFalse(boardId);
-        Map<Long, Long> voteCounts = new HashMap<>();
-        
-        for (Card card : cards) {
-            long count = voteRepository.countByCard_Id(card.getId());
-            voteCounts.put(card.getId(), count);
+    
+        public Map<Long, Long> getBoardVotes(Long boardId) {
+            // Optimized: Single query with GROUP BY instead of N+1 queries
+            List<Object[]> results = voteRepository.countVotesByBoardId(boardId);
+            Map<Long, Long> voteCounts = new HashMap<>();
+
+            for (Object[] result : results) {
+                Long cardId = (Long) result[0];
+                Long count = (Long) result[1];
+                voteCounts.put(cardId, count);
+            }
+
+            // Include cards with 0 votes
+            List<Card> cards = cardRepository.findByBoardColumn_Board_IdAndDeletedFalse(boardId);
+            for (Card card : cards) {
+                voteCounts.putIfAbsent(card.getId(), 0L);
+            }
+
+            return voteCounts;
         }
-        
-        return voteCounts;
-    }
+
+
 
   
     public List<Vote> getUserBoardVotes(Long userId, Long boardId) {

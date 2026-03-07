@@ -35,4 +35,12 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
 
 
 	Optional<Vote> findByUser_IdAndCard_Id(Long userId, Long cardId);
+
+
+	// Optimized query to get all vote counts for a board in one query
+	@Query("SELECT v.card.id, COUNT(v) FROM Vote v " +
+	       "WHERE v.card.boardColumn.board.id = :boardId " +
+	       "GROUP BY v.card.id")
+	List<Object[]> countVotesByBoardId(@Param("boardId") Long boardId);
+
 }

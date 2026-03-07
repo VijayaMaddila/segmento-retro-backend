@@ -28,7 +28,11 @@ public class Team {
     @JoinTable(
         name = "team_members",
         joinColumns = @JoinColumn(name = "team_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+        inverseJoinColumns = @JoinColumn(name = "user_id"),
+        indexes = {
+            @Index(name = "idx_team_members_team_id", columnList = "team_id"),
+            @Index(name = "idx_team_members_user_id", columnList = "user_id")
+        }
     )
     private List<Users> members;
 

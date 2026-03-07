@@ -6,9 +6,16 @@ import java.time.LocalDateTime;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-@Table(name = "votes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "card_id"})
-})
+@Table(name = "votes", 
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "card_id"})
+    },
+    indexes = {
+        @Index(name = "idx_vote_user_id", columnList = "user_id"),
+        @Index(name = "idx_vote_card_id", columnList = "card_id"),
+        @Index(name = "idx_vote_user_card", columnList = "user_id, card_id")
+    }
+)
 
 public class Vote {
 
