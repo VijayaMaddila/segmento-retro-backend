@@ -15,8 +15,8 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                            "http://localhost:5173",                // local dev
-                            "https://your-production-domain.com"   // production
+                            "http://localhost:5173",                
+                            "https://segmento-retro-omega.vercel.app"   
                         )
                         .allowedMethods("GET","POST","PUT","DELETE","OPTIONS")
                         .allowedHeaders("*")
