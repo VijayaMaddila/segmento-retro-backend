@@ -3,6 +3,8 @@ package com.retro.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.retro.model.Users;
@@ -17,8 +19,8 @@ public class UserService {
     private UserRepository userRepository;
 
     // GET ALL USERS
-    public List<Users> getAllUsers() {
-        return userRepository.findAll();
+    public Page<Users> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     // GET USER BY ID

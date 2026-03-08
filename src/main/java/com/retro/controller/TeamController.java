@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +27,10 @@ public class TeamController {
 
     // Get all teams
     @GetMapping
-    public List<TeamDTO> getAllTeams() {
-        return teamService.getAllTeams();
+    public ResponseEntity<Page<TeamDTO>> getAllTeams(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(teamService.getAllTeams(PageRequest.of(page, size)));
     }
 
     // Get team by ID

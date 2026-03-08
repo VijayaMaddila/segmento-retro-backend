@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,31 +74,39 @@ public class TeamService {
         );
     }
 
-    
     // Get all teams
-    public List<TeamDTO> getAllTeams() {
-        return teamRepository.findAll()
-                .stream()
-                .map(team -> new TeamDTO(
-                        team.getId(),
-                        team.getName(),
-                        team.getCreatedBy().getId(),
-                        team.getMembers().stream().map(Users::getId).toList()
-                ))
-                .toList();
+    public Page<TeamDTO> getAllTeams(Pageable pageable) {
+        Page<Long> teamIds = teamRepository.findTeamIdsByDeletedFalse(pageable);
+        
+        List<Team> teams = teamIds.getContent().isEmpty() ?
+            List.of() :
+            teamRepository.findByIdsWithDetails(teamIds.getContent());
+        
+        return teamIds.map(id -> {
+            Team team = teams.stream()
+                .filter(t -> t.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+            return team != null ? new TeamDTO(
+                team.getId(),
+                team.getName(),
+                team.getCreatedBy() != null ? team.getCreatedBy().getId() : null,
+                team.getMembers() != null ? team.getMembers().stream().map(Users::getId).toList() : List.of()
+            ) : null;
+        });
     }
 
     // =========================
     // Get team by ID
     // =========================
     public TeamDTO getTeamById(Long id) {
-        Team team = teamRepository.findById(id)
+        Team team = teamRepository.findByIdWithMembers(id)
                 .orElseThrow(() -> new RuntimeException("Team not found"));
         return new TeamDTO(
                 team.getId(),
                 team.getName(),
-                team.getCreatedBy().getId(),
-                team.getMembers().stream().map(Users::getId).toList()
+                team.getCreatedBy() != null ? team.getCreatedBy().getId() : null,
+                team.getMembers() != null ? team.getMembers().stream().map(Users::getId).toList() : List.of()
         );
     }
 

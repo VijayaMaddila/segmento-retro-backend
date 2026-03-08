@@ -20,31 +20,45 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     List<Board> findByTeamAndDeletedFalse(Team team);
 
-    // Fetch boards created by user, with team and members pre-loaded
+    // Fetch boards created by user, with team and members pre-loaded (paginated)
+    @Query(value = "SELECT b.id FROM Board b " +
+           "LEFT JOIN b.team t " +
+           "WHERE b.createdBy.id = :userId AND b.deleted = false AND (t IS NULL OR t.deleted = false)",
+           countQuery = "SELECT COUNT(b) FROM Board b " +
+           "LEFT JOIN b.team t " +
+           "WHERE b.createdBy.id = :userId AND b.deleted = false AND (t IS NULL OR t.deleted = false)")
+    Page<Long> findBoardIdsByCreatedBy(@Param("userId") Long userId, Pageable pageable);
+    
     @Query("SELECT DISTINCT b FROM Board b " +
            "LEFT JOIN FETCH b.createdBy " +
            "LEFT JOIN FETCH b.team t " +
            "LEFT JOIN FETCH t.members " +
-           "WHERE b.createdBy.id = :userId AND b.deleted = false AND (t IS NULL OR t.deleted = false)")
-    List<Board> findByCreatedByIdWithTeam(@Param("userId") Long userId);
+           "WHERE b.id IN :ids")
+    List<Board> findByIdsWithDetails(@Param("ids") List<Long> ids);
 
-    // Fetch boards where user is a team member, with team pre-loaded
-    @Query("SELECT DISTINCT b FROM Board b " +
-           "JOIN FETCH b.createdBy " +
-           "JOIN FETCH b.team t " +
+    // Fetch boards where user is a team member (paginated)
+    @Query(value = "SELECT DISTINCT b.id FROM Board b " +
+           "JOIN b.team t " +
+           "JOIN t.members m " +
+           "WHERE m.id = :userId AND b.deleted = false AND t.deleted = false",
+           countQuery = "SELECT COUNT(DISTINCT b) FROM Board b " +
+           "JOIN b.team t " +
            "JOIN t.members m " +
            "WHERE m.id = :userId AND b.deleted = false AND t.deleted = false")
-    List<Board> findByTeamMemberIdWithTeam(@Param("userId") Long userId);
+    Page<Long> findBoardIdsByTeamMember(@Param("userId") Long userId, Pageable pageable);
 
-    // Single combined query for ADMIN users — avoids duplicates and two round-trips
-    @Query("SELECT DISTINCT b FROM Board b " +
-           "LEFT JOIN FETCH b.createdBy " +
-           "LEFT JOIN FETCH b.team t " +
-           "LEFT JOIN FETCH t.members " +
+    // Single combined query for ADMIN users (paginated)
+    @Query(value = "SELECT DISTINCT b.id FROM Board b " +
+           "LEFT JOIN b.team t " +
+           "LEFT JOIN t.members m " +
+           "WHERE (b.createdBy.id = :userId OR m.id = :userId) " +
+           "AND b.deleted = false AND (t IS NULL OR t.deleted = false)",
+           countQuery = "SELECT COUNT(DISTINCT b) FROM Board b " +
+           "LEFT JOIN b.team t " +
            "LEFT JOIN t.members m " +
            "WHERE (b.createdBy.id = :userId OR m.id = :userId) " +
            "AND b.deleted = false AND (t IS NULL OR t.deleted = false)")
-    List<Board> findAllAccessibleByUserId(@Param("userId") Long userId);
+    Page<Long> findBoardIdsByAccessibleUser(@Param("userId") Long userId, Pageable pageable);
 
     // Fetch board with all nested relationships in one query to avoid N+1 problem
     @Query("SELECT b FROM Board b " +

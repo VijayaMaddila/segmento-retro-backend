@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -106,23 +107,33 @@ public class BoardController {
 
     // GET boards for a specific user
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<BoardSummaryDTO>> getUserBoards(@PathVariable Long userId) {
+    public ResponseEntity<Page<BoardSummaryDTO>> getUserBoards(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         Users user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Board> boards;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Long> boardIds;
 
         if (Users.Role.MEMBER.equals(user.getRole())) {
-            // MEMBER: only sees boards from teams they belong to
-            boards = boardRepository.findByTeamMemberIdWithTeam(userId);
+            boardIds = boardRepository.findBoardIdsByTeamMember(userId, pageable);
         } else {
-            // ADMIN: sees created boards + team boards in one query — no duplicates
-            boards = boardRepository.findAllAccessibleByUserId(userId);
+            boardIds = boardRepository.findBoardIdsByAccessibleUser(userId, pageable);
         }
 
-        List<BoardSummaryDTO> boardDTOs = boards.stream()
-            .map(BoardSummaryDTO::fromEntity)
-            .toList();
+        List<Board> boards = boardIds.getContent().isEmpty() ? 
+            List.of() : 
+            boardRepository.findByIdsWithDetails(boardIds.getContent());
+
+        Page<BoardSummaryDTO> boardDTOs = boardIds.map(id -> {
+            Board board = boards.stream()
+                .filter(b -> b.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+            return board != null ? BoardSummaryDTO.fromEntity(board) : null;
+        });
 
         return ResponseEntity.ok(boardDTOs);
     }
