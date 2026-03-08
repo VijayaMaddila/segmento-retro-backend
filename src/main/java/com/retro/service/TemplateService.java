@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.retro.dto.TemplateDTO;
@@ -46,27 +48,32 @@ public class TemplateService {
     }
 
     // GET ALL TEMPLATES
+    @Cacheable(value = "templates", key = "'all'")
     public List<Template> getAllTemplates() {
         return templateRepository.findAll();
     }
 
     // GET BY CATEGORY
+    @Cacheable(value = "templates", key = "'category:' + #category")
     public List<Template> getByCategory(String category) {
         return templateRepository.findByCategory(category);
     }
 
     // GET BY LANGUAGE
+    @Cacheable(value = "templates", key = "'language:' + #language")
     public List<Template> getByLanguage(String language) {
         return templateRepository.findByLanguage(language);
     }
 
     // GET DEFAULT TEMPLATES
+    @Cacheable(value = "templates", key = "'defaults'")
     public List<Template> getDefaultTemplates() {
         return templateRepository.findByIsDefaultTrue();
     }
 
     // UPDATE TEMPLATE
     @Transactional
+    @CacheEvict(value = "templates", allEntries = true)
     public Template updateTemplate(Long id, TemplateDTO dto) {
         Template template = templateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Template not found"));
@@ -95,6 +102,7 @@ public class TemplateService {
 
     // DELETE TEMPLATE
     @Transactional
+    @CacheEvict(value = "templates", allEntries = true)
     public void deleteTemplate(Long id) {
         if (!templateRepository.existsById(id)) {
             throw new RuntimeException("Template not found with id: " + id);
