@@ -1,5 +1,7 @@
 package com.retro.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,13 @@ public class TemplateColumnController {
 
     @Autowired
     private TemplateColumnService templateColumnService;
+
+    // GET COLUMNS BY TEMPLATE ID
+    @GetMapping("/template/{templateId}")
+    public ResponseEntity<List<TemplateColumn>> getColumnsByTemplate(@PathVariable Long templateId) {
+        List<TemplateColumn> columns = templateColumnService.getColumnsByTemplateId(templateId);
+        return ResponseEntity.ok(columns);
+    }
 
     // ADD COLUMN TO TEMPLATE
     @PostMapping("/{templateId}")

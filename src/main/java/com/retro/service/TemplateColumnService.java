@@ -1,5 +1,7 @@
 package com.retro.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,11 @@ public class TemplateColumnService {
 
     @Autowired
     private TemplateRepository templateRepository;
+
+    // GET COLUMNS BY TEMPLATE ID
+    public List<TemplateColumn> getColumnsByTemplateId(Long templateId) {
+        return templateColumnRepository.findByTemplateId(templateId);
+    }
 
     // ADD COLUMN TO TEMPLATE
     @Transactional
