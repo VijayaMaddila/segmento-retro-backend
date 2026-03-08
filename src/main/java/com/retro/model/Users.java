@@ -25,7 +25,7 @@ public class Users implements UserDetails {
     private String email;
     private String name;
 
-    // ✅ FIX 3: @JsonIgnore on password — never serialize the password hash to the client
+
     @JsonIgnore
     private String password;
 
@@ -37,13 +37,10 @@ public class Users implements UserDetails {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
-    // ✅ FIX 4: @JsonIgnore instead of @JsonBackReference
-    // @JsonBackReference silently suppresses the field — @JsonIgnore is explicit and safer
     @JsonIgnore
     private Team team;
 
-    // ✅ FIX 5: @JsonIgnore on boards — prevents lazy-loading all boards when serializing a user
-    // Serializing a user list was triggering N board loads per user
+    
     @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Board> boards;

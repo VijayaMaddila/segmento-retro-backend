@@ -2,18 +2,21 @@ package com.retro.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "boards", indexes = {
     @Index(name = "idx_board_created_by", columnList = "created_by"),
     @Index(name = "idx_board_team_id", columnList = "team_id"),
     @Index(name = "idx_board_deleted", columnList = "deleted"),
-    @Index(name = "idx_board_team_deleted", columnList = "team_id, deleted"),    
-    @Index(name = "idx_board_created_by_deleted", columnList = "created_by, deleted") 
+    @Index(name = "idx_board_team_deleted", columnList = "team_id, deleted"),
+    @Index(name = "idx_board_created_by_deleted", columnList = "created_by, deleted")
 })
 public class Board {
 
@@ -24,22 +27,29 @@ public class Board {
     @Column(nullable = false)
     private String title;
 
-    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY) 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
+    @JsonIgnore
     private Users createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY) 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
+    @JsonIgnore
     private Team team;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     private boolean deleted = false;
 
-
     @JsonManagedReference(value = "board-columns")
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY) // ✅ LAZY
+    @OneToMany(
+        mappedBy = "board",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
     private List<BoardColumn> columns;
 
     public Board() {}
@@ -55,63 +65,60 @@ public class Board {
         this.columns = columns;
     }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public Users getCreatedBy() {
-		return createdBy;
-	}
+    public Users getCreatedBy() {
+        return createdBy;
+    }
 
-	public void setCreatedBy(Users createdBy) {
-		this.createdBy = createdBy;
-	}
+    public void setCreatedBy(Users createdBy) {
+        this.createdBy = createdBy;
+    }
 
-	public Team getTeam() {
-		return team;
-	}
+    public Team getTeam() {
+        return team;
+    }
 
-	public void setTeam(Team team) {
-		this.team = team;
-	}
+    public void setTeam(Team team) {
+        this.team = team;
+    }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
-	public boolean isDeleted() {
-		return deleted;
-	}
+    public boolean isDeleted() {
+        return deleted;
+    }
 
-	public void setDeleted(boolean deleted) {
-		this.deleted = deleted;
-	}
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 
-	public List<BoardColumn> getColumns() {
-		return columns;
-	}
+    public List<BoardColumn> getColumns() {
+        return columns;
+    }
 
-	public void setColumns(List<BoardColumn> columns) {
-		this.columns = columns;
-	}
-    
-    
+    public void setColumns(List<BoardColumn> columns) {
+        this.columns = columns;
+    }
 
-   
 }
