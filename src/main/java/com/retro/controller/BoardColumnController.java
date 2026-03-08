@@ -13,26 +13,18 @@ import com.retro.service.BoardColumnService;
 
 @RestController
 @RequestMapping("/api/board-columns")
-
 public class BoardColumnController {
 
     @Autowired
     private BoardColumnService boardColumnService;
 
-    
-
-    @PostMapping("/{boardId}")
-    
-    public ResponseEntity<BoardColumn> addColumn(
-            @RequestBody ColumnRequestDTO dto) {
-
+    // CREATE column — boardId comes from request body only (removed unused @PathVariable)
+    @PostMapping
+    public ResponseEntity<BoardColumn> addColumn(@RequestBody ColumnRequestDTO dto) {
         BoardColumn column = new BoardColumn();
         column.setTitle(dto.getTitle());
         column.setPosition(dto.getPosition());
-
-        return ResponseEntity.ok(
-            boardColumnService.addColumn(dto.getBoardId(), column)
-        );
+        return ResponseEntity.ok(boardColumnService.addColumn(dto.getBoardId(), column));
     }
 
     // GET all columns for a board
@@ -41,17 +33,15 @@ public class BoardColumnController {
         return ResponseEntity.ok(boardColumnService.getColumnsByBoard(boardId));
     }
 
+    // UPDATE column title
     @PutMapping("/{columnId}")
     public ResponseEntity<BoardColumn> updateColumn(
             @PathVariable Long columnId,
             @RequestBody UpdatedColumnRequestDTO request) {
-
-        return ResponseEntity.ok(
-            boardColumnService.updateColumnName(columnId, request.getTitle())
-        );
+        return ResponseEntity.ok(boardColumnService.updateColumnName(columnId, request.getTitle()));
     }
 
-    // DELETE column
+    // DELETE column (soft delete)
     @DeleteMapping("/{columnId}")
     public ResponseEntity<String> deleteColumn(@PathVariable Long columnId) {
         boardColumnService.deleteColumn(columnId);

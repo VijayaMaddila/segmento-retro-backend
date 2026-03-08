@@ -12,24 +12,9 @@ import com.retro.model.Users;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
 
-    
-    @Query("SELECT DISTINCT t FROM Team t LEFT JOIN FETCH t.members WHERE t.deleted = false")
-    List<Team> findAllWithMembers();
-
-    
-    @Query("SELECT t FROM Team t LEFT JOIN FETCH t.members WHERE t.id = :id")
-    Optional<Team> findByIdWithMembers(@Param("id") Long id);
-
-    
-    @Query("SELECT DISTINCT t FROM Team t JOIN t.members m WHERE m.id = :userId AND t.deleted = false")
-    List<Team> findByMemberIdAndDeletedFalse(@Param("userId") Long userId);
-
-    
-    @Query("SELECT u FROM Users u WHERE u.id IN :ids")
-    List<Users> findMembersByIds(@Param("ids") List<Long> ids);
-
-    
-    List<Team> findByMembersContaining(Users user);
-    List<Team> findByDeletedFalse();
     List<Team> findByMembersContainingAndDeletedFalse(Users user);
+
+    // Eagerly fetch members in a single query — avoids lazy load during email loop
+    @Query("SELECT t FROM Team t LEFT JOIN FETCH t.members WHERE t.id = :id AND t.deleted = false")
+    Optional<Team> findByIdWithMembers(@Param("id") Long id);
 }

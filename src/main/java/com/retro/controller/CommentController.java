@@ -10,6 +10,8 @@ import com.retro.dto.CommentRequestDTO;
 import com.retro.model.Comment;
 import com.retro.service.CommentService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/comments")
 public class CommentController {
@@ -17,9 +19,10 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    //ADD COMMENT 
+    // ADD COMMENT
+    // ✅ @Valid triggers @NotNull/@NotBlank checks in CommentRequestDTO
     @PostMapping
-    public ResponseEntity<Comment> addComment(@RequestBody CommentRequestDTO request) {
+    public ResponseEntity<Comment> addComment(@Valid @RequestBody CommentRequestDTO request) {
         Comment comment = commentService.addComment(
                 request.getCardId(),
                 request.getUserId(),
@@ -28,25 +31,23 @@ public class CommentController {
         return ResponseEntity.ok(comment);
     }
 
-    //GET COMMENTS BY CARD
+    // GET COMMENTS BY CARD
     @GetMapping("/card/{cardId}")
     public ResponseEntity<List<Comment>> getCommentsByCard(@PathVariable Long cardId) {
-        List<Comment> comments = commentService.getCommentsByCard(cardId);
-        return ResponseEntity.ok(comments);
+        return ResponseEntity.ok(commentService.getCommentsByCard(cardId));
     }
 
-    //UPDATE COMMENT
+    // UPDATE COMMENT
     @PutMapping("/{commentId}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long commentId,
-                                                 @RequestBody CommentRequestDTO request) {
-        Comment updated = commentService.updateComment(commentId, request.getContent());
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<Comment> updateComment(
+            @PathVariable Long commentId,
+            @Valid @RequestBody CommentRequestDTO request) {
+        return ResponseEntity.ok(commentService.updateComment(commentId, request.getContent()));
     }
 
-    //DELETE COMMENT
+    // DELETE COMMENT (soft delete)
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long id) {
-
+    public ResponseEntity<String> deleteComment(@PathVariable Long id) {
         commentService.deleteComment(id);
         return ResponseEntity.ok("Comment deleted successfully");
     }

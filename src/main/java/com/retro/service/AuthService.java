@@ -8,7 +8,6 @@ import com.retro.dto.AuthResponseDTO;
 import com.retro.dto.LoginDTO;
 import com.retro.dto.RegisterRequestDTO;
 import com.retro.model.Users;
-import com.retro.model.Users.Role;
 import com.retro.repository.UserRepository;
 import com.retro.util.JwtUtil;
 

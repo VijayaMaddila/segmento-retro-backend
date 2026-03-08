@@ -7,10 +7,10 @@ import jakarta.persistence.*;
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Table(name = "comments", indexes = {
-    @Index(name = "idx_comment_card_id", columnList = "card_id"),                  
-    @Index(name = "idx_comment_user_id", columnList = "user_id"),                 
-    @Index(name = "idx_comment_deleted", columnList = "deleted"),                   
-    @Index(name = "idx_comment_card_deleted", columnList = "card_id, deleted")      
+    @Index(name = "idx_comment_card_id",      columnList = "card_id"),
+    @Index(name = "idx_comment_user_id",      columnList = "user_id"),
+    @Index(name = "idx_comment_deleted",      columnList = "deleted"),
+    @Index(name = "idx_comment_card_deleted", columnList = "card_id, deleted")
 })
 public class Comment {
 
@@ -18,14 +18,16 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ✅ Added nullable = false — a comment without a message should be rejected at DB level
+    @Column(nullable = false)
     private String message;
 
-    @ManyToOne(fetch = FetchType.LAZY)  
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id")
     @JsonBackReference(value = "card-comments")
     private Card card;
 
-    @ManyToOne(fetch = FetchType.LAZY)  
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Users user;
 
@@ -42,46 +44,18 @@ public class Comment {
         this.deleted = deleted;
     }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId()                   { return id; }
+    public void setId(Long id)            { this.id = id; }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public String getMessage()            { return message; }
+    public void setMessage(String msg)    { this.message = msg; }
 
-	public String getMessage() {
-		return message;
-	}
+    public Card getCard()                 { return card; }
+    public void setCard(Card card)        { this.card = card; }
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    public Users getUser()                { return user; }
+    public void setUser(Users user)       { this.user = user; }
 
-	public Card getCard() {
-		return card;
-	}
-
-	public void setCard(Card card) {
-		this.card = card;
-	}
-
-	public Users getUser() {
-		return user;
-	}
-
-	public void setUser(Users user) {
-		this.user = user;
-	}
-
-	public boolean isDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(boolean deleted) {
-		this.deleted = deleted;
-	}
-	
-
-   
+    public boolean isDeleted()            { return deleted; }
+    public void setDeleted(boolean d)     { this.deleted = d; }
 }

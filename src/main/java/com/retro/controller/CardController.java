@@ -10,6 +10,8 @@ import com.retro.dto.CardRequestDTO;
 import com.retro.model.Card;
 import com.retro.service.CardService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/cards")
 public class CardController {
@@ -17,39 +19,39 @@ public class CardController {
     @Autowired
     private CardService cardService;
 
-    //CREATE CARD
+    // CREATE CARD
+    // ✅ @Valid triggers @NotNull/@NotBlank checks in CardRequestDTO automatically
     @PostMapping
-    public Card createCard(@RequestBody CardRequestDTO request) {
-        if (request.getColumnId() == null || request.getUserId() == null) {
-            throw new RuntimeException("BoardColumnId and UserId must not be null");
-        }
-        return cardService.createCard(
+    public ResponseEntity<Card> createCard(@Valid @RequestBody CardRequestDTO request) {
+        Card card = cardService.createCard(
                 request.getColumnId(),
                 request.getUserId(),
                 request.getContent()
         );
+        return ResponseEntity.ok(card);
     }
 
-    //GET CARDS BY BOARD
+    // GET CARDS BY BOARD
     @GetMapping("/board/{boardId}")
     public ResponseEntity<List<Card>> getCardsByBoard(@PathVariable Long boardId) {
         return ResponseEntity.ok(cardService.getBoardCards(boardId));
     }
 
-    //GET CARDS BY COLUMN
+    // GET CARDS BY COLUMN
     @GetMapping("/column/{columnId}")
     public ResponseEntity<List<Card>> getCardsByColumn(@PathVariable Long columnId) {
         return ResponseEntity.ok(cardService.getColumnCards(columnId));
     }
 
-    //UPDATE CARD
+    // UPDATE CARD
     @PutMapping("/{cardId}")
-    public ResponseEntity<Card> updateCard(@PathVariable Long cardId, @RequestBody CardRequestDTO request) {
-        Card updatedCard = cardService.updateCard(cardId, request.getContent());
-        return ResponseEntity.ok(updatedCard);
+    public ResponseEntity<Card> updateCard(
+            @PathVariable Long cardId,
+            @RequestBody CardRequestDTO request) {
+        return ResponseEntity.ok(cardService.updateCard(cardId, request.getContent()));
     }
 
-    // DELETE CARD
+    // DELETE CARD (soft delete)
     @DeleteMapping("/{cardId}")
     public ResponseEntity<String> deleteCard(@PathVariable Long cardId) {
         cardService.deleteCard(cardId);

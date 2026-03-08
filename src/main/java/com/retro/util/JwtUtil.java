@@ -1,13 +1,12 @@
 package com.retro.util;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
 import com.retro.model.Users;
-import com.retro.model.Users.Role;
+
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

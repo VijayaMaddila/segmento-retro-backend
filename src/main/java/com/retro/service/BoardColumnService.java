@@ -28,13 +28,21 @@ public class BoardColumnService {
     // ADD COLUMN
     @Transactional
     public BoardColumn addColumn(Long boardId, BoardColumn column) {
-        column.setBoard(boardRepository.getReferenceById(boardId));
+        // Validate board exists before creating column
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new RuntimeException("Board not found: " + boardId));
+
+        column.setBoard(board);
         column.setDeleted(false);
         return boardColumnRepository.save(column);
     }
 
     // GET COLUMNS BY BOARD
     public List<BoardColumn> getColumnsByBoard(Long boardId) {
+        // Return 404-style error instead of silent empty list for invalid boardId
+        if (!boardRepository.existsById(boardId)) {
+            throw new RuntimeException("Board not found: " + boardId);
+        }
         return boardColumnRepository.findByBoard_IdAndDeletedFalse(boardId);
     }
 
@@ -45,7 +53,6 @@ public class BoardColumnService {
                 .findByIdAndDeletedFalse(columnId)
                 .orElseThrow(() -> new RuntimeException("Column not found"));
         column.setTitle(newTitle);
-        
         return column;
     }
 
@@ -58,7 +65,7 @@ public class BoardColumnService {
 
         column.setDeleted(true);
 
-        
+        // Soft delete all cards in this column in one batch query
         cardRepository.softDeleteByColumnId(columnId);
     }
 }

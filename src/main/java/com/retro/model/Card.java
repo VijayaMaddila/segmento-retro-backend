@@ -34,8 +34,9 @@ public class Card {
     @JoinColumn(name = "created_by")
     private Users createdBy;
 
-    
-    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    // ✅ Removed orphanRemoval = true — if comments are ever soft-deleted manually,
+    // orphanRemoval would conflict by attempting hard deletes via Hibernate cascade.
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Comment> comments = new ArrayList<>();
 
@@ -54,33 +55,21 @@ public class Card {
         this.deleted = deleted;
     }
 
-    public Long getId()                      
-	{ return id; }
-    public void setId(Long id)              
-	 { this.id = id; }
+    public Long getId()                             { return id; }
+    public void setId(Long id)                      { this.id = id; }
 
-    public String getContent()               
-	{ return content; }
-    public void setContent(String content)  
-	 { this.content = content; }
+    public String getContent()                      { return content; }
+    public void setContent(String content)          { this.content = content; }
 
-    public BoardColumn getBoardColumn()                   
-	 { return boardColumn; }
-    public void setBoardColumn(BoardColumn boardColumn)   
-	 { this.boardColumn = boardColumn; }
+    public BoardColumn getBoardColumn()             { return boardColumn; }
+    public void setBoardColumn(BoardColumn col)     { this.boardColumn = col; }
 
-    public Users getCreatedBy()                  
-	{ return createdBy; }
-    public void setCreatedBy(Users createdBy)    
-	{ this.createdBy = createdBy; }
+    public Users getCreatedBy()                     { return createdBy; }
+    public void setCreatedBy(Users createdBy)       { this.createdBy = createdBy; }
 
-    public List<Comment> getComments()                   
-	{ return comments; }
-    public void setComments(List<Comment> comments)      
-	{ this.comments = comments; }
+    public List<Comment> getComments()              { return comments; }
+    public void setComments(List<Comment> comments) { this.comments = comments; }
 
-    public boolean isDeleted()               
-	{ return deleted; }
-    public void setDeleted(boolean deleted)  
-	{ this.deleted = deleted; }
+    public boolean isDeleted()                      { return deleted; }
+    public void setDeleted(boolean deleted)         { this.deleted = deleted; }
 }

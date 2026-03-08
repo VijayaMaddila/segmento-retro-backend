@@ -29,52 +29,59 @@ public class CardService {
     // CREATE CARD
     @Transactional
     public Card createCard(Long boardColumnId, Long userId, String content) {
-        
-        BoardColumn column = boardColumnRepository.getReferenceById(boardColumnId);
-        Users user         = userRepository.getReferenceById(userId);
+        // ✅ Use findById instead of getReferenceById — gives clean errors if not found
+        BoardColumn column = boardColumnRepository.findByIdAndDeletedFalse(boardColumnId)
+                .orElseThrow(() -> new RuntimeException("Column not found: " + boardColumnId));
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
         Card card = new Card();
         card.setContent(content);
         card.setBoardColumn(column);
         card.setCreatedBy(user);
+        card.setDeleted(false);
 
         return cardRepository.save(card);
     }
 
-    // GET CARDS BY BOARD 
+    // GET CARDS BY BOARD
     public List<Card> getBoardCards(Long boardId) {
         return cardRepository.findByBoardIdAndDeletedFalse(boardId);
-
     }
 
-    // GET CARDS BY COLUMN 
+    // GET CARDS BY COLUMN
     public List<Card> getColumnCards(Long columnId) {
         return cardRepository.findByColumnIdAndDeletedFalse(columnId);
     }
 
-    // DELETE CARD
-    @Transactional
-    public void deleteCard(Long cardId) {
-        Card card = cardRepository.findById(cardId)
+    // GET CARD BY ID
+    public Card getCardById(Long cardId) {
+        return cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
-        card.setDeleted(true);
-        
     }
 
     // UPDATE CARD
     @Transactional
     public Card updateCard(Long cardId, String content) {
         Card card = cardRepository.findById(cardId)
-                .orElseThrow(() -> new RuntimeException("Card not found"));
+                .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
+        if (card.isDeleted()) {
+            throw new RuntimeException("Cannot update a deleted card");
+        }
         card.setContent(content);
-    
         return card;
     }
 
-    // GET CARD BY ID
-    public Card getCardById(Long cardId) {
-        return cardRepository.findById(cardId)
-                .orElseThrow(() -> new RuntimeException("Card not found"));
+    // SOFT DELETE CARD
+    @Transactional
+    public void deleteCard(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
+        // ✅ Guard against double-delete
+        if (card.isDeleted()) {
+            throw new RuntimeException("Card is already deleted");
+        }
+        card.setDeleted(true);
     }
-
 }
