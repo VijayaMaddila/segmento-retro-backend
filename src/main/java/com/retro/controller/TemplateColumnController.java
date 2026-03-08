@@ -24,6 +24,29 @@ public class TemplateColumnController {
         return ResponseEntity.ok(columns);
     }
 
+    // GET COLUMNS BY CATEGORY
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<TemplateColumn>> getColumnsByCategory(@PathVariable String category) {
+        List<TemplateColumn> columns = templateColumnService.getColumnsByCategory(category);
+        return ResponseEntity.ok(columns);
+    }
+
+    // GET COLUMNS BY LANGUAGE
+    @GetMapping("/language/{language}")
+    public ResponseEntity<List<TemplateColumn>> getColumnsByLanguage(@PathVariable String language) {
+        List<TemplateColumn> columns = templateColumnService.getColumnsByLanguage(language);
+        return ResponseEntity.ok(columns);
+    }
+
+    // GET COLUMNS BY CATEGORY AND LANGUAGE
+    @GetMapping("/category/{category}/language/{language}")
+    public ResponseEntity<List<TemplateColumn>> getColumnsByCategoryAndLanguage(
+            @PathVariable String category,
+            @PathVariable String language) {
+        List<TemplateColumn> columns = templateColumnService.getColumnsByCategoryAndLanguage(category, language);
+        return ResponseEntity.ok(columns);
+    }
+
     // ADD COLUMN TO TEMPLATE
     @PostMapping("/{templateId}")
     public ResponseEntity<TemplateColumn> addColumn(@PathVariable Long templateId,
