@@ -12,6 +12,9 @@ import com.retro.model.Users;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
 
+    // ✅ Used by getAllTeams — excludes soft-deleted teams
+    List<Team> findByDeletedFalse();
+
     List<Team> findByMembersContainingAndDeletedFalse(Users user);
 
     // Eagerly fetch members in a single query — avoids lazy load during email loop
