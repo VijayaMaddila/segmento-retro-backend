@@ -85,12 +85,15 @@ public class BoardService {
 
     // ---------------- GET BOARD BY ID ----------------
     public Board getBoardById(Long id) {
-        Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Board not found with id: " + id));
-
-        if (board.isDeleted()) {
-            throw new RuntimeException("Board has been deleted");
+        Board board = boardRepository.findByIdWithDetails(id);
+        
+        if (board == null) {
+            throw new RuntimeException("Board not found with id: " + id);
         }
+        
+        // Fetch columns with cards in a separate optimized query
+        List<BoardColumn> columns = boardRepository.findColumnsByBoardIdWithCards(id);
+        board.setColumns(columns);
 
         return board;
     }

@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.retro.dto.BoardDTO;
+import com.retro.dto.BoardDetailDTO;
+import com.retro.dto.BoardSummaryDTO;
 import com.retro.model.Board;
 import com.retro.model.Team;
 import com.retro.model.Users;
@@ -48,8 +50,9 @@ public class BoardController {
 
     // GET board by id
     @GetMapping("/{id}")
-    public ResponseEntity<Board> getBoardById(@PathVariable Long id) {
-        return ResponseEntity.ok(boardService.getBoardById(id));
+    public ResponseEntity<BoardDetailDTO> getBoardById(@PathVariable Long id) {
+        Board board = boardService.getBoardById(id);
+        return ResponseEntity.ok(BoardDetailDTO.fromEntity(board));
     }
 
     // CREATE a new board
@@ -103,7 +106,7 @@ public class BoardController {
 
     // GET boards for a specific user
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Board>> getUserBoards(@PathVariable Long userId) {
+    public ResponseEntity<List<BoardSummaryDTO>> getUserBoards(@PathVariable Long userId) {
         Users user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -117,6 +120,10 @@ public class BoardController {
             boards = boardRepository.findAllAccessibleByUserId(userId);
         }
 
-        return ResponseEntity.ok(boards);
+        List<BoardSummaryDTO> boardDTOs = boards.stream()
+            .map(BoardSummaryDTO::fromEntity)
+            .toList();
+
+        return ResponseEntity.ok(boardDTOs);
     }
 }
