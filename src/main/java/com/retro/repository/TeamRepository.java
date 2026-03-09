@@ -14,7 +14,7 @@ import com.retro.model.Users;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
 
-    // ✅ Used by getAllTeams — excludes soft-deleted teams (paginated)
+    // ✅ Used by getAllTeams — excludes soft-deleted teams 
     @Query(value = "SELECT t.id FROM Team t WHERE t.deleted = false",
            countQuery = "SELECT COUNT(t) FROM Team t WHERE t.deleted = false")
     Page<Long> findTeamIdsByDeletedFalse(Pageable pageable);
@@ -27,7 +27,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
     List<Team> findByMembersContainingAndDeletedFalse(Users user);
 
-    // Eagerly fetch members in a single query — avoids lazy load during email loop
+    // Eagerly fetch members in a single query 
     @Query("SELECT t FROM Team t " +
            "LEFT JOIN FETCH t.createdBy " +
            "LEFT JOIN FETCH t.members " +

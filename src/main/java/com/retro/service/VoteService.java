@@ -30,6 +30,9 @@ public class VoteService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private SlackService slackService;
+
     
 
     @Transactional
@@ -56,6 +59,11 @@ public class VoteService {
         Users user = userRepository.getReferenceById(userId);
         voteRepository.save(new Vote(user, card));
 
+        // Send Slack notification
+        String teamWebhook = (card.getBoardColumn().getBoard() != null && card.getBoardColumn().getBoard().getTeam() != null) 
+            ? card.getBoardColumn().getBoard().getTeam().getSlackWebhookUrl() : null;
+        slackService.sendVoteAdded(card.getContent(), user.getUsername(), currentVotes + 1, teamWebhook);
+
         
         return buildVoteResponseFast(cardId, userId, boardId, currentVotes + 1, true);
     }
@@ -73,10 +81,17 @@ public class VoteService {
         Vote vote = voteRepository.findByUser_IdAndCard_Id(userId, cardId)
                 .orElseThrow(() -> new RuntimeException("Vote not found"));
 
+        Users user = vote.getUser();
         voteRepository.delete(vote);
 
-        long newCount = voteRepository.countByCard_Id(cardId) - 1; 
-        return buildVoteResponseFast(cardId, userId, boardId, Math.max(0, newCount), false);
+        long newCount = voteRepository.countByCard_Id(cardId);
+
+        // Send Slack notification
+        String teamWebhook = (card.getBoardColumn().getBoard() != null && card.getBoardColumn().getBoard().getTeam() != null) 
+            ? card.getBoardColumn().getBoard().getTeam().getSlackWebhookUrl() : null;
+        slackService.sendVoteRemoved(card.getContent(), user.getUsername(), newCount, teamWebhook);
+
+        return buildVoteResponseFast(cardId, userId, boardId, newCount, false);
     }
 
 

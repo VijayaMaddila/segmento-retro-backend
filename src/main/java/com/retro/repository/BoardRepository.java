@@ -47,7 +47,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
            "WHERE m.id = :userId AND b.deleted = false AND t.deleted = false")
     Page<Long> findBoardIdsByTeamMember(@Param("userId") Long userId, Pageable pageable);
 
-    // Single combined query for ADMIN users (paginated)
+    // Single combined query for ADMIN users 
     @Query(value = "SELECT DISTINCT b.id FROM Board b " +
            "LEFT JOIN b.team t " +
            "LEFT JOIN t.members m " +
@@ -60,14 +60,14 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
            "AND b.deleted = false AND (t IS NULL OR t.deleted = false)")
     Page<Long> findBoardIdsByAccessibleUser(@Param("userId") Long userId, Pageable pageable);
 
-    // Fetch board with all nested relationships in one query to avoid N+1 problem
+    
     @Query("SELECT b FROM Board b " +
            "LEFT JOIN FETCH b.createdBy " +
            "LEFT JOIN FETCH b.team " +
            "WHERE b.id = :id AND b.deleted = false")
     Board findByIdWithDetails(@Param("id") Long id);
     
-    // Fetch columns with cards for a board (second query to avoid Cartesian product)
+    // Fetch columns with cards for a board 
     @Query("SELECT DISTINCT col FROM BoardColumn col " +
            "LEFT JOIN FETCH col.cards c " +
            "LEFT JOIN FETCH c.createdBy " +

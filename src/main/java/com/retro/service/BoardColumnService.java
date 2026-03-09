@@ -25,6 +25,9 @@ public class BoardColumnService {
     @Autowired
     private CardRepository cardRepository;
 
+    @Autowired
+    private SlackService slackService;
+
     // ADD COLUMN
     @Transactional
     public BoardColumn addColumn(Long boardId, BoardColumn column) {
@@ -34,7 +37,13 @@ public class BoardColumnService {
 
         column.setBoard(board);
         column.setDeleted(false);
-        return boardColumnRepository.save(column);
+        BoardColumn savedColumn = boardColumnRepository.save(column);
+
+        // Send Slack notification
+        String teamWebhook = (board.getTeam() != null) ? board.getTeam().getSlackWebhookUrl() : null;
+        slackService.sendColumnAdded(board.getTitle(), column.getTitle(), teamWebhook);
+
+        return savedColumn;
     }
 
     // GET COLUMNS BY BOARD
@@ -52,7 +61,14 @@ public class BoardColumnService {
         BoardColumn column = boardColumnRepository
                 .findByIdAndDeletedFalse(columnId)
                 .orElseThrow(() -> new RuntimeException("Column not found"));
+        String oldTitle = column.getTitle();
         column.setTitle(newTitle);
+
+        // Send Slack notification
+        String teamWebhook = (column.getBoard() != null && column.getBoard().getTeam() != null) 
+            ? column.getBoard().getTeam().getSlackWebhookUrl() : null;
+        slackService.sendColumnRenamed(oldTitle, newTitle, teamWebhook);
+
         return column;
     }
 
@@ -67,5 +83,10 @@ public class BoardColumnService {
 
         // Soft delete all cards in this column in one batch query
         cardRepository.softDeleteByColumnId(columnId);
+
+        // Send Slack notification
+        String teamWebhook = (column.getBoard() != null && column.getBoard().getTeam() != null) 
+            ? column.getBoard().getTeam().getSlackWebhookUrl() : null;
+        slackService.sendColumnDeleted(column.getTitle(), teamWebhook);
     }
 }

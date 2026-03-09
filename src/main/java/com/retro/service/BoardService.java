@@ -36,6 +36,9 @@ public class BoardService {
     @Autowired
     private TeamRepository teamRepository;
 
+    @Autowired
+    private SlackService slackService;
+
     @Transactional
     public Board createBoard(BoardDTO boardDto, Long userId) {
         Users user = userRepository.findById(userId)
@@ -48,16 +51,12 @@ public class BoardService {
         board.setDeleted(false);
 
         if (boardDto.getTeamId() != null) {
-            // ✅ Use findByIdWithMembers to eagerly load members in one query
-            // This prevents lazy loading during the email loop in the controller
             Team team = teamRepository.findByIdWithMembers(boardDto.getTeamId())
                     .orElseThrow(() -> new RuntimeException("Team not found"));
             board.setTeam(team);
         }
 
         Board savedBoard = boardRepository.save(board);
-
-        // ✅ Batch insert all columns in one query instead of saving one by one
         if (boardDto.getTemplateId() != null) {
             Template template = templateRepository.findById(boardDto.getTemplateId())
                     .orElseThrow(() -> new RuntimeException("Template not found"));
@@ -72,33 +71,43 @@ public class BoardService {
                 return bc;
             }).collect(Collectors.toList());
 
-            boardColumnRepository.saveAll(columns); // ✅ single batch insert
+            boardColumnRepository.saveAll(columns); 
         }
+
+        // Send Slack notification with board link (use team's webhook if available)
+        String teamWebhook = (savedBoard.getTeam() != null) ? savedBoard.getTeam().getSlackWebhookUrl() : null;
+        slackService.sendBoardCreated(savedBoard.getTitle(), user.getUsername(), savedBoard.getId(), teamWebhook);
 
         return savedBoard;
     }
 
-    // ---------------- GET ALL BOARDS ----------------
+    // GET ALL BOARDS
     public Page<Board> getAllBoards(Pageable pageable) {
         return boardRepository.findByDeletedFalse(pageable);
     }
 
-    // ---------------- GET BOARD BY ID ----------------
+    //GET BOARD BY ID
     public Board getBoardById(Long id) {
+        long t1 = System.currentTimeMillis();
         Board board = boardRepository.findByIdWithDetails(id);
+        long t2 = System.currentTimeMillis();
+        System.out.println("  ↳ DB: findByIdWithDetails took " + (t2 - t1) + "ms");
         
         if (board == null) {
             throw new RuntimeException("Board not found with id: " + id);
         }
         
-        // Fetch columns with cards in a separate optimized query
+        long t3 = System.currentTimeMillis();
         List<BoardColumn> columns = boardRepository.findColumnsByBoardIdWithCards(id);
+        long t4 = System.currentTimeMillis();
+        System.out.println("  ↳ DB: findColumnsByBoardIdWithCards took " + (t4 - t3) + "ms");
+        
         board.setColumns(columns);
 
         return board;
     }
 
-    // ---------------- UPDATE BOARD ----------------
+    //UPDATE BOARD 
     @Transactional
     public Board updateBoard(Long id, BoardDTO boardDto) {
         Board board = boardRepository.findById(id)
@@ -108,6 +117,7 @@ public class BoardService {
             throw new RuntimeException("Cannot update a deleted board");
         }
 
+        String oldTitle = board.getTitle();
         board.setTitle(boardDto.getTitle());
 
         if (boardDto.getTeamId() != null) {
@@ -116,10 +126,14 @@ public class BoardService {
             board.setTeam(team);
         }
 
+        // Send Slack notification
+        String teamWebhook = (board.getTeam() != null) ? board.getTeam().getSlackWebhookUrl() : null;
+        slackService.sendBoardUpdated(oldTitle, boardDto.getTitle(), teamWebhook);
+
         return board;
     }
 
-    // ---------------- SOFT DELETE BOARD ----------------
+    //DELETE BOARD
     @Transactional
     public void deleteBoard(Long id) {
         Board board = boardRepository.findById(id)
@@ -130,14 +144,31 @@ public class BoardService {
         }
 
         board.setDeleted(true);
+
+        // Send Slack notification
+        String teamWebhook = (board.getTeam() != null) ? board.getTeam().getSlackWebhookUrl() : null;
+        slackService.sendBoardDeleted(board.getTitle(), teamWebhook);
     }
 
-    // ---------------- RESTORE BOARD ----------------
+    //RESTORE BOARD
     @Transactional
     public void restoreBoard(Long id) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Board not found: " + id));
 
         board.setDeleted(false);
+    }
+
+    // START RETRO SESSION - Send notification to team
+    public void startRetroSession(Long boardId, Long userId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new RuntimeException("Board not found: " + boardId));
+        
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        // Send Slack notification with board link (use team's webhook if available)
+        String teamWebhook = (board.getTeam() != null) ? board.getTeam().getSlackWebhookUrl() : null;
+        slackService.sendRetroSessionStarted(board.getTitle(), board.getId(), user.getUsername(), teamWebhook);
     }
 }

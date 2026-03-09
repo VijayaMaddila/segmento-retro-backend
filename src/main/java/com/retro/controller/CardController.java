@@ -20,7 +20,6 @@ public class CardController {
     private CardService cardService;
 
     // CREATE CARD
-    // ✅ @Valid triggers @NotNull/@NotBlank checks in CardRequestDTO automatically
     @PostMapping
     public ResponseEntity<Card> createCard(@Valid @RequestBody CardRequestDTO request) {
         Card card = cardService.createCard(
@@ -51,7 +50,7 @@ public class CardController {
         return ResponseEntity.ok(cardService.updateCard(cardId, request.getContent()));
     }
 
-    // DELETE CARD (soft delete)
+    // DELETE CARD
     @DeleteMapping("/{cardId}")
     public ResponseEntity<String> deleteCard(@PathVariable Long cardId) {
         cardService.deleteCard(cardId);

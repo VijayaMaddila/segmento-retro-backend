@@ -20,7 +20,6 @@ public class CommentController {
     private CommentService commentService;
 
     // ADD COMMENT
-    // ✅ @Valid triggers @NotNull/@NotBlank checks in CommentRequestDTO
     @PostMapping
     public ResponseEntity<Comment> addComment(@Valid @RequestBody CommentRequestDTO request) {
         Comment comment = commentService.addComment(
@@ -45,7 +44,7 @@ public class CommentController {
         return ResponseEntity.ok(commentService.updateComment(commentId, request.getContent()));
     }
 
-    // DELETE COMMENT (soft delete)
+    // DELETE COMMENT 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteComment(@PathVariable Long id) {
         commentService.deleteComment(id);

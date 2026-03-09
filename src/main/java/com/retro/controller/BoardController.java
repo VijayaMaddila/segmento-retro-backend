@@ -41,18 +41,25 @@ public class BoardController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // GET all boards (paginated)
+    // GET all boards 
     @GetMapping
     public ResponseEntity<Page<Board>> getAllBoards(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(boardService.getAllBoards(PageRequest.of(page, size)));
+        long startTime = System.currentTimeMillis();
+        Page<Board> result = boardService.getAllBoards(PageRequest.of(page, size));
+        long endTime = System.currentTimeMillis();
+        System.out.println("⏱️ GET /api/boards (page=" + page + ", size=" + size + ") took " + (endTime - startTime) + "ms");
+        return ResponseEntity.ok(result);
     }
 
     // GET board by id
     @GetMapping("/{id}")
     public ResponseEntity<BoardDetailDTO> getBoardById(@PathVariable Long id) {
+        long startTime = System.currentTimeMillis();
         Board board = boardService.getBoardById(id);
+        long endTime = System.currentTimeMillis();
+        System.out.println("⏱️ GET /api/boards/" + id + " took " + (endTime - startTime) + "ms");
         return ResponseEntity.ok(BoardDetailDTO.fromEntity(board));
     }
 
@@ -61,8 +68,7 @@ public class BoardController {
     public ResponseEntity<Board> createBoard(@RequestBody BoardDTO boardDto) {
         Board board = boardService.createBoard(boardDto, boardDto.getUserId());
 
-        // Send email notifications to team members (except the creator)
-        // ✅ team.getMembers() is safe here — members were eagerly loaded in createBoard()
+        // Send email notifications to team members
         if (board.getTeam() != null) {
             Team team = board.getTeam();
             Users creator = board.getCreatedBy();
@@ -111,22 +117,34 @@ public class BoardController {
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        long startTime = System.currentTimeMillis();
+        
+        long t1 = System.currentTimeMillis();
         Users user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
+        long t2 = System.currentTimeMillis();
+        System.out.println("  ↳ DB: findById(user) took " + (t2 - t1) + "ms");
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Long> boardIds;
 
+        long t3 = System.currentTimeMillis();
         if (Users.Role.MEMBER.equals(user.getRole())) {
             boardIds = boardRepository.findBoardIdsByTeamMember(userId, pageable);
         } else {
             boardIds = boardRepository.findBoardIdsByAccessibleUser(userId, pageable);
         }
+        long t4 = System.currentTimeMillis();
+        System.out.println("  ↳ DB: findBoardIds took " + (t4 - t3) + "ms");
 
+        long t5 = System.currentTimeMillis();
         List<Board> boards = boardIds.getContent().isEmpty() ? 
             List.of() : 
             boardRepository.findByIdsWithDetails(boardIds.getContent());
+        long t6 = System.currentTimeMillis();
+        System.out.println("  ↳ DB: findByIdsWithDetails took " + (t6 - t5) + "ms");
 
+        long t7 = System.currentTimeMillis();
         Page<BoardSummaryDTO> boardDTOs = boardIds.map(id -> {
             Board board = boards.stream()
                 .filter(b -> b.getId().equals(id))
@@ -134,7 +152,20 @@ public class BoardController {
                 .orElse(null);
             return board != null ? BoardSummaryDTO.fromEntity(board) : null;
         });
+        long t8 = System.currentTimeMillis();
+        System.out.println("  ↳ DTO mapping took " + (t8 - t7) + "ms");
 
+        long endTime = System.currentTimeMillis();
+        System.out.println("⏱️ GET /api/boards/user/" + userId + " (page=" + page + ", size=" + size + ") took " + (endTime - startTime) + "ms");
         return ResponseEntity.ok(boardDTOs);
+    }
+
+    // START RETRO SESSION - Notify team via Slack
+    @PostMapping("/{id}/start-session")
+    public ResponseEntity<String> startRetroSession(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+        boardService.startRetroSession(id, userId);
+        return ResponseEntity.ok("Retro session started. Team notified via Slack.");
     }
 }

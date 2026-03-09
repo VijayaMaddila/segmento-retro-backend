@@ -17,7 +17,7 @@ public class TeamDTO {
 
     private List<Long> members;
 
-    // ✅ No-arg constructor required by Jackson for JSON deserialization
+    
     public TeamDTO() {}
 
     public TeamDTO(Long id, String name, Long createdBy, List<Long> members) {
@@ -27,15 +27,23 @@ public class TeamDTO {
         this.members = members;
     }
 
-    public Long getId()                     { return id; }
-    public void setId(Long id)              { this.id = id; }
+    public Long getId()                     
+    { return id; }
+    public void setId(Long id)              
+    { this.id = id; }
 
-    public String getName()                 { return name; }
-    public void setName(String name)        { this.name = name; }
+    public String getName()                 
+    { return name; }
+    public void setName(String name)        
+    { this.name = name; }
 
-    public Long getCreatedBy()              { return createdBy; }
-    public void setCreatedBy(Long createdBy){ this.createdBy = createdBy; }
+    public Long getCreatedBy()              
+    { return createdBy; }
+    public void setCreatedBy(Long createdBy)
+    { this.createdBy = createdBy; }
 
-    public List<Long> getMembers()          { return members; }
-    public void setMembers(List<Long> m)    { this.members = m; }
+    public List<Long> getMembers()          
+    { return members; }
+    public void setMembers(List<Long> m)    
+    { this.members = m; }
 }

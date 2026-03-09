@@ -14,7 +14,7 @@ public class CommentRequestDTO {
     @NotBlank(message = "content must not be blank")
     private String content;
 
-    // ✅ No-arg constructor required by Jackson for JSON deserialization
+    
     public CommentRequestDTO() {}
 
     public CommentRequestDTO(Long cardId, Long userId, String content) {
@@ -23,12 +23,18 @@ public class CommentRequestDTO {
         this.content = content;
     }
 
-    public Long getCardId()                 { return cardId; }
-    public void setCardId(Long cardId)      { this.cardId = cardId; }
+    public Long getCardId()                 
+    { return cardId; }
+    public void setCardId(Long cardId)      
+    { this.cardId = cardId; }
 
-    public Long getUserId()                 { return userId; }
-    public void setUserId(Long userId)      { this.userId = userId; }
+    public Long getUserId()                 
+    { return userId; }
+    public void setUserId(Long userId)      
+    { this.userId = userId; }
 
-    public String getContent()              { return content; }
-    public void setContent(String content)  { this.content = content; }
+    public String getContent()              
+    { return content; }
+    public void setContent(String content)  
+    { this.content = content; }
 }

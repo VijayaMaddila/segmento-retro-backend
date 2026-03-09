@@ -31,24 +31,38 @@ public class BoardSummaryDTO {
         return dto;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() 
+    { return id; }
+    public void setId(Long id)
+     { this.id = id; }
     
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getTitle() 
+    { return title; }
+    public void setTitle(String title) 
+    { this.title = title; }
     
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() 
+    { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) 
+    { this.createdAt = createdAt; }
     
-    public Long getCreatedById() { return createdById; }
-    public void setCreatedById(Long createdById) { this.createdById = createdById; }
+    public Long getCreatedById() 
+    { return createdById; }
+    public void setCreatedById(Long createdById) 
+    { this.createdById = createdById; }
     
-    public String getCreatedByName() { return createdByName; }
-    public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
+    public String getCreatedByName() 
+    { return createdByName; }
+    public void setCreatedByName(String createdByName) 
+    { this.createdByName = createdByName; }
     
-    public Long getTeamId() { return teamId; }
-    public void setTeamId(Long teamId) { this.teamId = teamId; }
+    public Long getTeamId() 
+    { return teamId; }
+    public void setTeamId(Long teamId) 
+    { this.teamId = teamId; }
     
-    public String getTeamName() { return teamName; }
-    public void setTeamName(String teamName) { this.teamName = teamName; }
+    public String getTeamName() 
+    { return teamName; }
+    public void setTeamName(String teamName) 
+    { this.teamName = teamName; }
 }

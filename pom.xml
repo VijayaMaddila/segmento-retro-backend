@@ -37,6 +37,20 @@
    <artifactId>spring-boot-starter-data-jpa</artifactId>
   </dependency>
 
+  <!-- PostgreSQL -->
+  <dependency>
+   <groupId>org.postgresql</groupId>
+   <artifactId>postgresql</artifactId>
+   <scope>runtime</scope>
+  </dependency>
+
+  <!-- H2 Database (Local Development) -->
+  <dependency>
+   <groupId>com.h2database</groupId>
+   <artifactId>h2</artifactId>
+   <scope>runtime</scope>
+  </dependency>
+
   <!-- Validation -->
   <dependency>
    <groupId>org.springframework.boot</groupId>
@@ -47,13 +61,6 @@
   <dependency>
    <groupId>org.springframework.boot</groupId>
    <artifactId>spring-boot-starter-security</artifactId>
-  </dependency>
-
-  <!-- PostgreSQL -->
-  <dependency>
-   <groupId>org.postgresql</groupId>
-   <artifactId>postgresql</artifactId>
-   <scope>runtime</scope>
   </dependency>
 
   <!-- JWT -->
@@ -95,7 +102,7 @@
    <artifactId>spring-boot-starter-cache</artifactId>
   </dependency>
 
-  <!-- Caffeine Cache (In-Memory, Fast) -->
+  <!-- Caffeine Cache -->
   <dependency>
    <groupId>com.github.ben-manes.caffeine</groupId>
    <artifactId>caffeine</artifactId>

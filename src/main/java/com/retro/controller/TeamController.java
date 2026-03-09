@@ -30,13 +30,21 @@ public class TeamController {
     public ResponseEntity<Page<TeamDTO>> getAllTeams(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(teamService.getAllTeams(PageRequest.of(page, size)));
+        long startTime = System.currentTimeMillis();
+        Page<TeamDTO> result = teamService.getAllTeams(PageRequest.of(page, size));
+        long endTime = System.currentTimeMillis();
+        System.out.println("⏱️ GET /api/teams (page=" + page + ", size=" + size + ") took " + (endTime - startTime) + "ms");
+        return ResponseEntity.ok(result);
     }
 
     // Get team by ID
     @GetMapping("/{id}")
     public TeamDTO getTeamById(@PathVariable Long id) {
-        return teamService.getTeamById(id);
+        long startTime = System.currentTimeMillis();
+        TeamDTO result = teamService.getTeamById(id);
+        long endTime = System.currentTimeMillis();
+        System.out.println("⏱️ GET /api/teams/" + id + " took " + (endTime - startTime) + "ms");
+        return result;
     }
 
     // Invite multiple members
@@ -69,5 +77,22 @@ public class TeamController {
     public ResponseEntity<Map<String, Object>> checkUser(@RequestParam String email) {
         Map<String, Object> response = teamService.checkUserExists(email);
         return ResponseEntity.ok(response);
+    }
+
+    // Update team's Slack webhook URL
+    @PutMapping("/{teamId}/slack-webhook")
+    public ResponseEntity<Map<String, String>> updateSlackWebhook(
+            @PathVariable Long teamId,
+            @RequestBody Map<String, String> request) {
+        String webhookUrl = request.get("webhookUrl");
+        teamService.updateSlackWebhook(teamId, webhookUrl);
+        return ResponseEntity.ok(Map.of("message", "Slack webhook updated successfully"));
+    }
+
+    // Get team's Slack webhook URL
+    @GetMapping("/{teamId}/slack-webhook")
+    public ResponseEntity<Map<String, String>> getSlackWebhook(@PathVariable Long teamId) {
+        String webhookUrl = teamService.getSlackWebhook(teamId);
+        return ResponseEntity.ok(Map.of("webhookUrl", webhookUrl != null ? webhookUrl : ""));
     }
 }

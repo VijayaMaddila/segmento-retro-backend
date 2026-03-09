@@ -22,6 +22,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @Async
     public void sendInviteEmail(String to, String teamName, String inviteLink) {
         try {
             // Validate email format
@@ -40,14 +41,14 @@ public class EmailService {
             System.out.println("✅ Invitation email sent successfully to: " + to);
         } catch (AddressException e) {
             System.err.println("❌ Invalid email address: " + to);
-            throw new RuntimeException("Invalid email address: " + to);
+            // Don't throw - just log the error in async context
         } catch (Exception e) {
             System.err.println("❌ Failed to send invitation email to: " + to + " - " + e.getMessage());
-            throw new RuntimeException("Failed to send email: " + e.getMessage());
+            // Don't throw - just log the error in async context
         }
     }
     
-    @Async("emailTaskExecutor")
+    @Async
     public CompletableFuture<Void> sendBoardCreationEmail(
             String recipientEmail,
             String recipientName,
@@ -68,7 +69,7 @@ public class EmailService {
             // Get current date
             String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
             
-            // Build magic link with boardId for direct board access
+            
             String directBoardLink = magicLinkUrl + "&boardId=" + boardId;
             
             // Build professional HTML email
@@ -82,7 +83,7 @@ public class EmailService {
                 magicLinkUrl
             );
 
-            helper.setText(htmlContent, true); // true = HTML
+            helper.setText(htmlContent, true); 
             
             System.out.println("Sending board creation email to: " + recipientEmail);
             mailSender.send(message);

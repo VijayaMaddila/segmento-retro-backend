@@ -18,7 +18,7 @@ public class BoardColumnController {
     @Autowired
     private BoardColumnService boardColumnService;
 
-    // CREATE column — boardId comes from request body only (removed unused @PathVariable)
+
     @PostMapping
     public ResponseEntity<BoardColumn> addColumn(@RequestBody ColumnRequestDTO dto) {
         BoardColumn column = new BoardColumn();
@@ -27,13 +27,21 @@ public class BoardColumnController {
         return ResponseEntity.ok(boardColumnService.addColumn(dto.getBoardId(), column));
     }
 
+    // UPDATE column using POST (for frontend compatibility)
+    @PostMapping("/{columnId}")
+    public ResponseEntity<BoardColumn> updateColumnPost(
+            @PathVariable Long columnId,
+            @RequestBody UpdatedColumnRequestDTO request) {
+        return ResponseEntity.ok(boardColumnService.updateColumnName(columnId, request.getTitle()));
+    }
+
     // GET all columns for a board
     @GetMapping("/board/{boardId}")
     public ResponseEntity<List<BoardColumn>> getColumnsByBoard(@PathVariable Long boardId) {
         return ResponseEntity.ok(boardColumnService.getColumnsByBoard(boardId));
     }
 
-    // UPDATE column title
+    // UPDATE column title (standard REST)
     @PutMapping("/{columnId}")
     public ResponseEntity<BoardColumn> updateColumn(
             @PathVariable Long columnId,

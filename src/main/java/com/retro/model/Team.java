@@ -39,6 +39,12 @@ public class Team {
     @Column(nullable = false)
     private boolean deleted = false;
 
+    @Column(name = "slack_webhook_url")
+    private String slackWebhookUrl;
+
+    @Column(name = "frontend_url")
+    private String frontendUrl;
+
     public Team() {}
 
     public Team(Long id, String name, Users createdBy, List<Users> members, boolean deleted) {
@@ -87,5 +93,21 @@ public class Team {
 
     public void setDeleted(boolean deleted) {  
         this.deleted = deleted;
+    }
+
+    public String getSlackWebhookUrl() {
+        return slackWebhookUrl;
+    }
+
+    public void setSlackWebhookUrl(String slackWebhookUrl) {
+        this.slackWebhookUrl = slackWebhookUrl;
+    }
+
+    public String getFrontendUrl() {
+        return frontendUrl;
+    }
+
+    public void setFrontendUrl(String frontendUrl) {
+        this.frontendUrl = frontendUrl;
     }
 }

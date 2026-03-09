@@ -53,7 +53,7 @@ public class UserController {
         return ResponseEntity.ok("User deleted successfully.");
     }
 
-    // Optional: GET user by email 
+    //get user by email
     @GetMapping("/email/{email}")
     public ResponseEntity<Users> getUserByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.getUserByEmail(email));

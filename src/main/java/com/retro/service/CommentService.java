@@ -26,11 +26,14 @@ public class CommentService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private SlackService slackService;
+
     // CREATE COMMENT
     @Transactional
     public Comment addComment(Long cardId, Long userId, String message) {
-        // ✅ Replaced getReferenceById with findById — gives clean errors immediately
-        Card card = cardRepository.findById(cardId)
+        // Fetch card with team for Slack notification
+        Card card = cardRepository.findByIdWithTeam(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
         if (card.isDeleted()) {
             throw new RuntimeException("Cannot comment on a deleted card");
@@ -45,7 +48,19 @@ public class CommentService {
         comment.setMessage(message);
         comment.setDeleted(false);
 
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        // Send Slack notification
+        try {
+            String teamWebhook = (card.getBoardColumn() != null && card.getBoardColumn().getBoard() != null 
+                && card.getBoardColumn().getBoard().getTeam() != null) 
+                ? card.getBoardColumn().getBoard().getTeam().getSlackWebhookUrl() : null;
+            slackService.sendCommentAdded(card.getContent(), message, user.getUsername(), teamWebhook);
+        } catch (Exception e) {
+            System.err.println("Failed to send Slack notification for comment: " + e.getMessage());
+        }
+
+        return savedComment;
     }
 
     // GET COMMENTS FOR CARD
@@ -59,7 +74,27 @@ public class CommentService {
         Comment comment = commentRepository
                 .findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found or already deleted"));
+        
+        String oldMessage = comment.getMessage();
         comment.setMessage(message);
+
+        // Send Slack notification
+        try {
+            Card card = comment.getCard();
+            if (card.getBoardColumn() == null) {
+                // Fetch card with team
+                card = cardRepository.findByIdWithTeam(card.getId()).orElse(card);
+            }
+            String teamWebhook = (card.getBoardColumn() != null 
+                && card.getBoardColumn().getBoard() != null 
+                && card.getBoardColumn().getBoard().getTeam() != null) 
+                ? card.getBoardColumn().getBoard().getTeam().getSlackWebhookUrl() : null;
+            slackService.sendCommentUpdated(card.getContent(), oldMessage, message, 
+                comment.getUser().getUsername(), teamWebhook);
+        } catch (Exception e) {
+            System.err.println("Failed to send Slack notification for comment update: " + e.getMessage());
+        }
+
         return comment;
     }
 
@@ -69,6 +104,23 @@ public class CommentService {
         Comment comment = commentRepository
                 .findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found or already deleted"));
+        
         comment.setDeleted(true);
+
+        // Send Slack notification
+        try {
+            Card card = comment.getCard();
+            if (card.getBoardColumn() == null) {
+                // Fetch card with team
+                card = cardRepository.findByIdWithTeam(card.getId()).orElse(card);
+            }
+            String teamWebhook = (card.getBoardColumn() != null 
+                && card.getBoardColumn().getBoard() != null 
+                && card.getBoardColumn().getBoard().getTeam() != null) 
+                ? card.getBoardColumn().getBoard().getTeam().getSlackWebhookUrl() : null;
+            slackService.sendCommentDeleted(card.getContent(), comment.getMessage(), teamWebhook);
+        } catch (Exception e) {
+            System.err.println("Failed to send Slack notification for comment deletion: " + e.getMessage());
+        }
     }
 }

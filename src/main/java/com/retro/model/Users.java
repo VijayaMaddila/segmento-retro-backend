@@ -93,7 +93,7 @@ public class Users implements UserDetails {
     public void setBoards(List<Board> boards)    
     { this.boards = boards; }
 
-    // ── UserDetails
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null) return List.of();

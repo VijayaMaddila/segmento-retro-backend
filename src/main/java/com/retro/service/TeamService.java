@@ -76,13 +76,18 @@ public class TeamService {
 
     // Get all teams
     public Page<TeamDTO> getAllTeams(Pageable pageable) {
+        long t1 = System.currentTimeMillis();
         Page<Long> teamIds = teamRepository.findTeamIdsByDeletedFalse(pageable);
+        long t2 = System.currentTimeMillis();
+        System.out.println("  ↳ DB: findTeamIdsByDeletedFalse took " + (t2 - t1) + "ms");
         
         List<Team> teams = teamIds.getContent().isEmpty() ?
             List.of() :
             teamRepository.findByIdsWithDetails(teamIds.getContent());
+        long t3 = System.currentTimeMillis();
+        System.out.println("  ↳ DB: findByIdsWithDetails took " + (t3 - t2) + "ms");
         
-        return teamIds.map(id -> {
+        Page<TeamDTO> result = teamIds.map(id -> {
             Team team = teams.stream()
                 .filter(t -> t.getId().equals(id))
                 .findFirst()
@@ -94,43 +99,44 @@ public class TeamService {
                 team.getMembers() != null ? team.getMembers().stream().map(Users::getId).toList() : List.of()
             ) : null;
         });
+        long t4 = System.currentTimeMillis();
+        System.out.println("  ↳ DTO mapping took " + (t4 - t3) + "ms");
+        
+        return result;
     }
 
-    // =========================
     // Get team by ID
-    // =========================
     public TeamDTO getTeamById(Long id) {
+        long t1 = System.currentTimeMillis();
         Team team = teamRepository.findByIdWithMembers(id)
                 .orElseThrow(() -> new RuntimeException("Team not found"));
-        return new TeamDTO(
+        long t2 = System.currentTimeMillis();
+        System.out.println("  ↳ DB: findByIdWithMembers took " + (t2 - t1) + "ms");
+        
+        TeamDTO result = new TeamDTO(
                 team.getId(),
                 team.getName(),
                 team.getCreatedBy() != null ? team.getCreatedBy().getId() : null,
                 team.getMembers() != null ? team.getMembers().stream().map(Users::getId).toList() : List.of()
         );
+        long t3 = System.currentTimeMillis();
+        System.out.println("  ↳ DTO mapping took " + (t3 - t2) + "ms");
+        
+        return result;
     }
-
-    // =========================
-    // Generate invitations and send emails to multiple members
-    // =========================
     public void generateInvitations(Long teamId, List<String> emails) {
         Team team = teamRepository.findById(teamId)
             .orElseThrow(() -> new RuntimeException("Team not found"));
 
         for (String email : emails) {
             try {
-                // Create a random token
                 String token = UUID.randomUUID().toString();
 
-                // Save invitation in DB
+                
                 TeamInvitation invitation = new TeamInvitation(email, token, team);
                 invitationRepository.save(invitation);
-
-                // Encode token and email for URL
                 String inviteLink = "http://localhost:5173/join?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8)
                         + "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8);
-
-                // Send email with invitation link
                 emailService.sendInviteEmail(email, team.getName(), inviteLink);
 
             } catch (RuntimeException e) {
@@ -138,18 +144,10 @@ public class TeamService {
             }
         }
     }
-
-    // =========================
-    // Accept invitation - Reusable for login
-    // First time: Create account and join team
-    // Subsequent times: Auto-login and redirect to main page
-    // =========================
     @Transactional
     public Map<String, Object> acceptInvitation(String token, String name, String email, String password) {
         TeamInvitation invitation = invitationRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid or expired invitation link"));
-
-        // Check if expired (7 days)
         if (invitation.isExpired()) {
             throw new RuntimeException("This invitation link has expired. Please request a new invitation.");
         }
@@ -161,10 +159,7 @@ public class TeamService {
         Users user;
 
         if (existingUser.isPresent()) {
-            // User already exists (second+ click) → Just login and redirect
             user = existingUser.get();
-            
-            // Check if user is already in the team
             Team team = invitation.getTeam();
             boolean alreadyInTeam = team.getMembers().contains(user);
             
@@ -177,11 +172,9 @@ public class TeamService {
             response.put("alreadyInTeam", alreadyInTeam);
             
             if (invitation.isAccepted()) {
-                // Second+ click → Just login
                 response.put("message", "Welcome back! Logging you in...");
                 response.put("action", "redirect");
             } else {
-                // First click, existing user → Add to team
                 response.put("message", "Welcome! You've been added to the team.");
                 response.put("action", "redirect");
             }
@@ -190,7 +183,7 @@ public class TeamService {
             response.put("token", jwtToken);
 
         } else {
-            // New user - password is required
+        
             if (password == null || password.trim().isEmpty()) {
                 throw new RuntimeException("Password is required for new users");
             }
@@ -228,7 +221,6 @@ public class TeamService {
         return response;
     }
     
-    // Check invitation status without accepting
     public Map<String, Object> checkInvitationStatus(String token) {
         Optional<TeamInvitation> invitationOpt = invitationRepository.findByToken(token);
         
@@ -281,5 +273,33 @@ public class TeamService {
         }
         
         return response;
+    }
+
+    // Update team's Slack webhook URL
+    @Transactional
+    public void updateSlackWebhook(Long teamId, String webhookUrl) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+        
+        // Validate and clean webhook URL
+        if (webhookUrl != null && !webhookUrl.isEmpty()) {
+            // Remove any duplicate protocol prefixes
+            webhookUrl = webhookUrl.replaceAll("^https?://h+ttps?://", "https://");
+            
+            // Validate format
+            if (!webhookUrl.startsWith("https://hooks.slack.com/services/")) {
+                throw new RuntimeException("Invalid Slack webhook URL format. Must start with https://hooks.slack.com/services/");
+            }
+        }
+        
+        team.setSlackWebhookUrl(webhookUrl);
+        teamRepository.save(team);
+    }
+
+    // Get team's Slack webhook URL
+    public String getSlackWebhook(Long teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+        return team.getSlackWebhookUrl();
     }
 }

@@ -26,10 +26,12 @@ public class CardService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private SlackService slackService;
+
     // CREATE CARD
     @Transactional
     public Card createCard(Long boardColumnId, Long userId, String content) {
-        // ✅ Use findById instead of getReferenceById — gives clean errors if not found
         BoardColumn column = boardColumnRepository.findByIdAndDeletedFalse(boardColumnId)
                 .orElseThrow(() -> new RuntimeException("Column not found: " + boardColumnId));
 
@@ -42,7 +44,14 @@ public class CardService {
         card.setCreatedBy(user);
         card.setDeleted(false);
 
-        return cardRepository.save(card);
+        Card savedCard = cardRepository.save(card);
+
+        // Send Slack notification
+        String teamWebhook = (column.getBoard() != null && column.getBoard().getTeam() != null) 
+            ? column.getBoard().getTeam().getSlackWebhookUrl() : null;
+        slackService.sendCardCreated(column.getTitle(), content, user.getUsername(), teamWebhook);
+
+        return savedCard;
     }
 
     // GET CARDS BY BOARD
@@ -69,19 +78,32 @@ public class CardService {
         if (card.isDeleted()) {
             throw new RuntimeException("Cannot update a deleted card");
         }
+        String oldContent = card.getContent();
         card.setContent(content);
+
+        // Send Slack notification
+        String teamWebhook = (card.getBoardColumn().getBoard() != null && card.getBoardColumn().getBoard().getTeam() != null) 
+            ? card.getBoardColumn().getBoard().getTeam().getSlackWebhookUrl() : null;
+        slackService.sendCardUpdated(card.getBoardColumn().getTitle(), oldContent, content, teamWebhook);
+
         return card;
     }
 
-    // SOFT DELETE CARD
+    //DELETE CARD
     @Transactional
     public void deleteCard(Long cardId) {
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
-        // ✅ Guard against double-delete
         if (card.isDeleted()) {
             throw new RuntimeException("Card is already deleted");
         }
         card.setDeleted(true);
+
+        // Send Slack notification
+        String teamWebhook = (card.getBoardColumn().getBoard() != null && card.getBoardColumn().getBoard().getTeam() != null) 
+            ? card.getBoardColumn().getBoard().getTeam().getSlackWebhookUrl() : null;
+        slackService.sendCardDeleted(card.getBoardColumn().getTitle(), card.getContent(), teamWebhook);
     }
+
 }
+
