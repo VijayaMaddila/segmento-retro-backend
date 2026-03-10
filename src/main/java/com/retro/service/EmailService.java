@@ -25,7 +25,7 @@ public class EmailService {
     @Async
     public void sendInviteEmail(String to, String teamName, String inviteLink) {
         try {
-            // Validate email format
+            
             InternetAddress emailAddr = new InternetAddress(to);
             emailAddr.validate();
 
@@ -44,7 +44,7 @@ public class EmailService {
             // Don't throw - just log the error in async context
         } catch (Exception e) {
             System.err.println("❌ Failed to send invitation email to: " + to + " - " + e.getMessage());
-            // Don't throw - just log the error in async context
+        
         }
     }
     
@@ -66,13 +66,13 @@ public class EmailService {
             helper.setSubject("New Board: " + boardTitle + " - " + teamName);
             helper.setFrom("noreply@segmentoretro.com");
             
-            // Get current date
+            
             String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
             
             
             String directBoardLink = magicLinkUrl + "&boardId=" + boardId;
             
-            // Build professional HTML email
+            
             String htmlContent = buildBoardNotificationHtml(
                 recipientName,
                 boardTitle,

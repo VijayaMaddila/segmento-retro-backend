@@ -47,6 +47,13 @@ public class TeamController {
         return result;
     }
 
+    // Delete team (soft delete)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteTeam(@PathVariable Long id) {
+        teamService.deleteTeam(id);
+        return ResponseEntity.ok(Map.of("message", "Team deleted successfully"));
+    }
+
     // Invite multiple members
     @PostMapping("/{teamId}/invite")
     public ResponseEntity<String> inviteMembers(@PathVariable Long teamId, @RequestBody List<String> emails) {
@@ -94,5 +101,23 @@ public class TeamController {
     public ResponseEntity<Map<String, String>> getSlackWebhook(@PathVariable Long teamId) {
         String webhookUrl = teamService.getSlackWebhook(teamId);
         return ResponseEntity.ok(Map.of("webhookUrl", webhookUrl != null ? webhookUrl : ""));
+    }
+
+    // Remove member from team
+    @DeleteMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<Map<String, String>> removeMember(
+            @PathVariable Long teamId,
+            @PathVariable Long userId) {
+        teamService.removeMember(teamId, userId);
+        return ResponseEntity.ok(Map.of("message", "Member removed successfully"));
+    }
+
+    // Add member to team
+    @PostMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<Map<String, String>> addMember(
+            @PathVariable Long teamId,
+            @PathVariable Long userId) {
+        teamService.addMember(teamId, userId);
+        return ResponseEntity.ok(Map.of("message", "Member added successfully"));
     }
 }

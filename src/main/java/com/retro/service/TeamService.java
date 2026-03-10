@@ -66,12 +66,16 @@ public class TeamService {
 
         Team savedTeam = teamRepository.save(team);
 
-        return new TeamDTO(
+        TeamDTO dto = new TeamDTO(
                 savedTeam.getId(),
                 savedTeam.getName(),
                 savedTeam.getCreatedBy().getId(),
                 savedTeam.getMembers().stream().map(Users::getId).toList()
         );
+        dto.setMemberDetails(savedTeam.getMembers().stream()
+                .map(u -> new TeamDTO.MemberInfo(u.getId(), u.getName(), u.getEmail()))
+                .toList());
+        return dto;
     }
 
     // Get all teams
@@ -92,17 +96,33 @@ public class TeamService {
                 .filter(t -> t.getId().equals(id))
                 .findFirst()
                 .orElse(null);
-            return team != null ? new TeamDTO(
+            if (team == null) return null;
+            
+            TeamDTO dto = new TeamDTO(
                 team.getId(),
                 team.getName(),
                 team.getCreatedBy() != null ? team.getCreatedBy().getId() : null,
                 team.getMembers() != null ? team.getMembers().stream().map(Users::getId).toList() : List.of()
-            ) : null;
+            );
+            dto.setMemberDetails(team.getMembers() != null ? 
+                team.getMembers().stream()
+                    .map(u -> new TeamDTO.MemberInfo(u.getId(), u.getName(), u.getEmail()))
+                    .toList() : List.of());
+            return dto;
         });
         long t4 = System.currentTimeMillis();
         System.out.println("  ↳ DTO mapping took " + (t4 - t3) + "ms");
         
         return result;
+    }
+
+    // Delete team (soft delete)
+    @Transactional
+    public void deleteTeam(Long id) {
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+        team.setDeleted(true);
+        teamRepository.save(team);
     }
 
     // Get team by ID
@@ -119,6 +139,10 @@ public class TeamService {
                 team.getCreatedBy() != null ? team.getCreatedBy().getId() : null,
                 team.getMembers() != null ? team.getMembers().stream().map(Users::getId).toList() : List.of()
         );
+        result.setMemberDetails(team.getMembers() != null ? 
+            team.getMembers().stream()
+                .map(u -> new TeamDTO.MemberInfo(u.getId(), u.getName(), u.getEmail()))
+                .toList() : List.of());
         long t3 = System.currentTimeMillis();
         System.out.println("  ↳ DTO mapping took " + (t3 - t2) + "ms");
         
@@ -301,5 +325,33 @@ public class TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new RuntimeException("Team not found"));
         return team.getSlackWebhookUrl();
+    }
+
+    // Remove member from team
+    @Transactional
+    public void removeMember(Long teamId, Long userId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+        
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        team.getMembers().remove(user);
+        teamRepository.save(team);
+    }
+
+    // Add member to team
+    @Transactional
+    public void addMember(Long teamId, Long userId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+        
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        if (!team.getMembers().contains(user)) {
+            team.getMembers().add(user);
+            teamRepository.save(team);
+        }
     }
 }
